@@ -19,6 +19,7 @@ import {
   Box,
 } from "lucide-react";
 import { extractPersonalName } from "@/lib/display-name";
+import { useLanguage } from "@/components/language-provider";
 
 interface ObjectData {
   id: string;
@@ -45,6 +46,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default function RecordDetailPage() {
+  const { language } = useLanguage();
   const params = useParams<{ slug: string; recordId: string }>();
   const router = useRouter();
   const { slug, recordId } = params;
@@ -103,7 +105,14 @@ export default function RecordDetailPage() {
   );
 
   const handleDelete = useCallback(async () => {
-    if (!confirm("Are you sure you want to delete this record?")) return;
+    if (
+      !confirm(
+        language === "zh"
+          ? "确定要删除这条记录吗？"
+          : "Are you sure you want to delete this record?"
+      )
+    )
+      return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/v1/objects/${slug}/records/${recordId}`, {
@@ -115,12 +124,12 @@ export default function RecordDetailPage() {
     } finally {
       setDeleting(false);
     }
-  }, [slug, recordId, router]);
+  }, [language, slug, recordId, router]);
 
   if (loading && !record) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Loading...
+        {language === "zh" ? "加载中..." : "Loading..."}
       </div>
     );
   }
@@ -128,17 +137,17 @@ export default function RecordDetailPage() {
   if (!object || !record) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Record not found
+        {language === "zh" ? "记录不存在" : "Record not found"}
       </div>
     );
   }
 
   const nameAttr = object.attributes.find((a: any) => a.slug === "name");
-  let displayName = "Unnamed";
+  let displayName = language === "zh" ? "未命名" : "Unnamed";
   if (nameAttr) {
     const val = record.values.name;
     if (nameAttr.type === "personal_name" && val) {
-      displayName = extractPersonalName(val) || "Unnamed";
+      displayName = extractPersonalName(val) || (language === "zh" ? "未命名" : "Unnamed");
     } else if (typeof val === "string") {
       displayName = val;
     }
@@ -176,7 +185,13 @@ export default function RecordDetailPage() {
               className="text-muted-foreground hover:text-destructive"
             >
               <Trash2 className="mr-1 h-4 w-4" />
-              {deleting ? "Deleting..." : "Delete"}
+              {deleting
+                ? language === "zh"
+                  ? "删除中..."
+                  : "Deleting..."
+                : language === "zh"
+                  ? "删除"
+                  : "Delete"}
             </Button>
           </div>
         </div>
@@ -185,11 +200,13 @@ export default function RecordDetailPage() {
         <div className="px-6 py-4">
           <Tabs defaultValue="attributes">
             <TabsList>
-              <TabsTrigger value="attributes">Attributes</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="attributes">
+                {language === "zh" ? "属性" : "Attributes"}
+              </TabsTrigger>
+              <TabsTrigger value="notes">{language === "zh" ? "笔记" : "Notes"}</TabsTrigger>
+              <TabsTrigger value="tasks">{language === "zh" ? "任务" : "Tasks"}</TabsTrigger>
               <TabsTrigger value="activity">
-                Activity
+                {language === "zh" ? "动态" : "Activity"}
                 {activities.length > 0 && (
                   <span className="ml-1.5 text-xs text-muted-foreground">
                     {activities.length}
@@ -197,7 +214,7 @@ export default function RecordDetailPage() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="related">
-                Related
+                {language === "zh" ? "关联" : "Related"}
                 {(related.related.length + related.forward.length) > 0 && (
                   <span className="ml-1.5 text-xs text-muted-foreground">
                     {related.related.length + related.forward.length}
@@ -240,30 +257,39 @@ export default function RecordDetailPage() {
       <div className="hidden w-64 shrink-0 border-l border-border lg:block">
         <div className="p-4 space-y-4">
           <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Record Info
+            {language === "zh" ? "记录信息" : "Record Info"}
           </h3>
           <div className="space-y-3">
-            <MetaItem label="Record ID" value={record.id.slice(0, 8) + "..."} />
-            <MetaItem label="Object" value={object.singularName} />
             <MetaItem
-              label="Created"
-              value={new Date(record.createdAt).toLocaleDateString(undefined, {
+              label={language === "zh" ? "记录 ID" : "Record ID"}
+              value={record.id.slice(0, 8) + "..."}
+            />
+            <MetaItem label={language === "zh" ? "对象" : "Object"} value={object.singularName} />
+            <MetaItem
+              label={language === "zh" ? "创建时间" : "Created"}
+              value={new Date(record.createdAt).toLocaleDateString(
+                language === "zh" ? "zh-CN" : "en-US",
+                {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              }
+              )}
             />
             <MetaItem
-              label="Updated"
-              value={new Date(record.updatedAt).toLocaleDateString(undefined, {
+              label={language === "zh" ? "更新时间" : "Updated"}
+              value={new Date(record.updatedAt).toLocaleDateString(
+                language === "zh" ? "zh-CN" : "en-US",
+                {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              }
+              )}
             />
           </div>
         </div>

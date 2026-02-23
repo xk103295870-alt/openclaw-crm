@@ -1,5 +1,6 @@
 import type { AttributeType } from "@openclaw-crm/shared";
 import type { FilterCondition } from "@openclaw-crm/shared";
+import type { Language } from "@/lib/i18n";
 
 /** Get available operators for a given attribute type */
 export function getOperatorsForType(type: AttributeType): FilterCondition["operator"][] {
@@ -49,3 +50,29 @@ export const OPERATOR_LABELS: Record<FilterCondition["operator"], string> = {
   in: "is any of",
   not_in: "is none of",
 };
+
+export const OPERATOR_LABELS_ZH: Record<FilterCondition["operator"], string> = {
+  equals: "是",
+  not_equals: "不是",
+  contains: "包含",
+  not_contains: "不包含",
+  starts_with: "开头是",
+  ends_with: "结尾是",
+  greater_than: "大于",
+  less_than: "小于",
+  greater_than_or_equals: "至少",
+  less_than_or_equals: "至多",
+  is_empty: "为空",
+  is_not_empty: "不为空",
+  in: "属于任意",
+  not_in: "不属于任意",
+};
+
+export function getOperatorLabel(
+  operator: FilterCondition["operator"],
+  language: Language
+): string {
+  return language === "zh"
+    ? OPERATOR_LABELS_ZH[operator]
+    : OPERATOR_LABELS[operator];
+}

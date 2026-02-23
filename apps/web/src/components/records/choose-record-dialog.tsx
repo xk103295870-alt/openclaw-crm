@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 interface RecordOption {
   recordId: string;
@@ -43,6 +44,7 @@ export function ChooseRecordDialog({
   onOpenChange,
   onSelect,
 }: ChooseRecordDialogProps) {
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [records, setRecords] = useState<RecordOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -137,9 +139,11 @@ export function ChooseRecordDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 gap-0">
         <DialogHeader className="px-4 pt-4 pb-0">
-          <DialogTitle>Choose record</DialogTitle>
+          <DialogTitle>{language === "zh" ? "选择记录" : "Choose record"}</DialogTitle>
           <DialogDescription className="sr-only">
-            Select a record to link this note to
+            {language === "zh"
+              ? "选择一条记录并关联到该笔记"
+              : "Select a record to link this note to"}
           </DialogDescription>
         </DialogHeader>
 
@@ -156,7 +160,7 @@ export function ChooseRecordDialog({
                 searchRecords(e.target.value);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Search records..."
+              placeholder={language === "zh" ? "搜索记录..." : "Search records..."}
               className="pl-9"
             />
           </div>
@@ -166,20 +170,20 @@ export function ChooseRecordDialog({
         <div className="max-h-[400px] overflow-auto">
           {loading && records.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Loading...
+              {language === "zh" ? "加载中..." : "Loading..."}
             </p>
           )}
 
           {!loading && records.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No records found
+              {language === "zh" ? "未找到记录" : "No records found"}
             </p>
           )}
 
           {records.length > 0 && (
             <div className="px-2 py-2">
               <p className="px-2 pb-2 text-xs font-medium text-muted-foreground">
-                Records
+                {language === "zh" ? "记录" : "Records"}
               </p>
               {records.map((rec, idx) => (
                 <button
@@ -234,10 +238,10 @@ export function ChooseRecordDialog({
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>↑ ↓</span>
-            <span>Navigate</span>
+            <span>{language === "zh" ? "导航" : "Navigate"}</span>
           </div>
           <div className="flex items-center gap-1 rounded bg-primary/20 px-2 py-1 text-xs text-primary">
-            Select record ↵
+            {language === "zh" ? "选择记录 ↵" : "Select record ↵"}
           </div>
         </div>
       </DialogContent>

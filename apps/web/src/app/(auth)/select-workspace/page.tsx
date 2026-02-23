@@ -86,10 +86,10 @@ function SelectWorkspaceForm() {
         router.push("/home");
       } else {
         const data = await res.json();
-        setError(data.error?.message || "Failed to create workspace");
+        setError(data.error?.message || t("workspace.select.error.createFailed"));
       }
     } catch {
-      setError("Something went wrong");
+      setError(t("workspace.select.error.generic"));
     } finally {
       setCreating(false);
     }

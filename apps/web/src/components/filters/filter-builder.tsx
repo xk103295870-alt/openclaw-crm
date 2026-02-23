@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { FilterCondition, FilterGroup } from "@openclaw-crm/shared";
 import type { AttributeType } from "@openclaw-crm/shared";
-import { getOperatorsForType, OPERATOR_LABELS } from "@/lib/filter-utils";
+import { getOperatorsForType, getOperatorLabel } from "@/lib/filter-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -35,6 +35,8 @@ export function FilterBuilder({
   onChange,
   onClose,
 }: FilterBuilderProps) {
+  const { language } = useLanguage();
+
   // Only show filterable attributes
   const filterableAttrs = attributes.filter(
     (a) => a.type !== "interaction"
@@ -90,7 +92,9 @@ export function FilterBuilder({
   return (
     <div className="w-[480px] space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Filters</h3>
+        <h3 className="text-sm font-medium">
+          {language === "zh" ? "筛选" : "Filters"}
+        </h3>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
@@ -111,7 +115,7 @@ export function FilterBuilder({
                 {/* AND/OR toggle for 2nd+ condition */}
                 {index === 0 ? (
                   <span className="w-12 shrink-0 text-xs text-muted-foreground text-right">
-                    Where
+                    {language === "zh" ? "条件" : "Where"}
                   </span>
                 ) : (
                   <button
@@ -150,7 +154,7 @@ export function FilterBuilder({
                   {attr &&
                     getOperatorsForType(attr.type).map((op) => (
                       <option key={op} value={op}>
-                        {OPERATOR_LABELS[op]}
+                        {getOperatorLabel(op, language)}
                       </option>
                     ))}
                 </select>
@@ -180,13 +184,15 @@ export function FilterBuilder({
 
       {filter.conditions.length === 0 && (
         <p className="text-xs text-muted-foreground py-2">
-          No filters applied. Add a filter to narrow down records.
+          {language === "zh"
+            ? "当前未应用筛选。添加筛选以缩小记录范围。"
+            : "No filters applied. Add a filter to narrow down records."}
         </p>
       )}
 
       <Button variant="ghost" size="sm" onClick={addCondition} className="text-xs">
         <Plus className="mr-1 h-3.5 w-3.5" />
-        Add filter
+        {language === "zh" ? "添加筛选" : "Add filter"}
       </Button>
     </div>
   );
@@ -203,6 +209,8 @@ function FilterValueInput({
   value: unknown;
   onChange: (val: unknown) => void;
 }) {
+  const { language } = useLanguage();
+
   if (!attribute) return null;
 
   // Select/status: dropdown of options
@@ -213,7 +221,7 @@ function FilterValueInput({
         onChange={(e) => onChange(e.target.value)}
         className="h-8 flex-1 rounded-md border border-border bg-background px-2 text-xs min-w-[100px]"
       >
-        <option value="">Select...</option>
+        <option value="">{language === "zh" ? "请选择..." : "Select..."}</option>
         {attribute.options.map((opt) => (
           <option key={opt.id} value={opt.id}>
             {opt.title}
@@ -230,7 +238,7 @@ function FilterValueInput({
         onChange={(e) => onChange(e.target.value)}
         className="h-8 flex-1 rounded-md border border-border bg-background px-2 text-xs min-w-[100px]"
       >
-        <option value="">Select...</option>
+        <option value="">{language === "zh" ? "请选择..." : "Select..."}</option>
         {attribute.statuses.map((s) => (
           <option key={s.id} value={s.id}>
             {s.title}
@@ -248,9 +256,9 @@ function FilterValueInput({
         onChange={(e) => onChange(e.target.value === "true")}
         className="h-8 flex-1 rounded-md border border-border bg-background px-2 text-xs min-w-[80px]"
       >
-        <option value="">Select...</option>
-        <option value="true">Yes</option>
-        <option value="false">No</option>
+        <option value="">{language === "zh" ? "请选择..." : "Select..."}</option>
+        <option value="true">{language === "zh" ? "是" : "Yes"}</option>
+        <option value="false">{language === "zh" ? "否" : "No"}</option>
       </select>
     );
   }
@@ -267,7 +275,7 @@ function FilterValueInput({
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : "")}
         className="h-8 flex-1 text-xs min-w-[80px]"
-        placeholder="Value"
+        placeholder={language === "zh" ? "值" : "Value"}
       />
     );
   }
@@ -291,7 +299,7 @@ function FilterValueInput({
       value={String(value ?? "")}
       onChange={(e) => onChange(e.target.value)}
       className="h-8 flex-1 text-xs min-w-[100px]"
-      placeholder="Value"
+      placeholder={language === "zh" ? "值" : "Value"}
     />
   );
 }

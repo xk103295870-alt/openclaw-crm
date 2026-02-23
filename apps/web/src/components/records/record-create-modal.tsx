@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, X, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeDef {
   id: string;
@@ -42,6 +43,7 @@ export function RecordCreateModal({
   attributes,
   objectName,
 }: RecordCreateModalProps) {
+  const { language } = useLanguage();
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -65,8 +67,14 @@ export function RecordCreateModal({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-h-[80vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Create {objectName}</DialogTitle>
-          <DialogDescription>Fill in the fields to create a new record.</DialogDescription>
+          <DialogTitle>
+            {language === "zh" ? `创建${objectName}` : `Create ${objectName}`}
+          </DialogTitle>
+          <DialogDescription>
+            {language === "zh"
+              ? "填写字段信息以创建新记录。"
+              : "Fill in the fields to create a new record."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {attributes.map((attr) => (
@@ -79,10 +87,16 @@ export function RecordCreateModal({
           ))}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {language === "zh" ? "取消" : "Cancel"}
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Creating..." : "Create"}
+              {submitting
+                ? language === "zh"
+                  ? "创建中..."
+                  : "Creating..."
+                : language === "zh"
+                  ? "创建"
+                  : "Create"}
             </Button>
           </DialogFooter>
         </form>
@@ -100,6 +114,7 @@ function FieldInput({
   value: unknown;
   onChange: (val: unknown) => void;
 }) {
+  const { language } = useLanguage();
   const { type, title, isRequired, slug } = attr;
 
   return (
@@ -127,7 +142,7 @@ function FieldInput({
         <Input
           type="number"
           step="0.01"
-          placeholder="Amount"
+          placeholder={language === "zh" ? "金额" : "Amount"}
           value={(value as { amount?: number })?.amount?.toString() ?? ""}
           onChange={(e) =>
             onChange(
@@ -161,7 +176,7 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value || null)}
           required={isRequired}
         >
-          <option value="">Select...</option>
+          <option value="">{language === "zh" ? "请选择..." : "Select..."}</option>
           {attr.options?.map((opt) => (
             <option key={opt.id} value={opt.id}>
               {opt.title}
@@ -175,7 +190,7 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value || null)}
           required={isRequired}
         >
-          <option value="">Select...</option>
+          <option value="">{language === "zh" ? "请选择..." : "Select..."}</option>
           {attr.statuses?.map((s) => (
             <option key={s.id} value={s.id}>
               {s.title}
@@ -199,7 +214,7 @@ function FieldInput({
       ) : type === "personal_name" ? (
         <div className="flex gap-2">
           <Input
-            placeholder="First name"
+            placeholder={language === "zh" ? "名" : "First name"}
             value={(value as { firstName?: string })?.firstName ?? ""}
             onChange={(e) => {
               const pn = (value as { firstName?: string; lastName?: string }) || {};
@@ -213,7 +228,7 @@ function FieldInput({
             required={isRequired}
           />
           <Input
-            placeholder="Last name"
+            placeholder={language === "zh" ? "姓" : "Last name"}
             value={(value as { lastName?: string })?.lastName ?? ""}
             onChange={(e) => {
               const pn = (value as { firstName?: string; lastName?: string }) || {};
@@ -259,6 +274,7 @@ function RecordReferencePicker({
   value: string | null;
   onChange: (val: unknown) => void;
 }) {
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<
     { recordId: string; displayName: string; objectSlug: string; objectName: string }[]
@@ -373,16 +389,20 @@ function RecordReferencePicker({
           search(e.target.value);
         }}
         onFocus={handleFocus}
-        placeholder="Search records..."
+        placeholder={language === "zh" ? "搜索记录..." : "Search records..."}
         className="h-9"
       />
       {showDropdown && (
         <div className="absolute z-50 mt-1 w-full max-h-48 overflow-auto rounded-md border bg-popover shadow-lg">
           {loading && results.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-3">Loading...</p>
+            <p className="text-xs text-muted-foreground text-center py-3">
+              {language === "zh" ? "加载中..." : "Loading..."}
+            </p>
           )}
           {!loading && results.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-3">No records found</p>
+            <p className="text-xs text-muted-foreground text-center py-3">
+              {language === "zh" ? "未找到记录" : "No records found"}
+            </p>
           )}
           {results.map((rec) => (
             <button

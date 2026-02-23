@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Loader2, Plus, Trash2, Copy, Check, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface ApiKey {
   id: string;
@@ -26,6 +27,7 @@ interface ApiKey {
 }
 
 export default function ApiKeysPage() {
+  const { language, t } = useLanguage();
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -79,7 +81,7 @@ export default function ApiKeysPage() {
         fetchKeys();
       } else {
         const data = await res.json();
-        setError(data.error?.message ?? "Failed to create API key");
+        setError(data.error?.message ?? t("settings.apiKeys.error.createFailed"));
       }
     } finally {
       setCreating(false);
@@ -98,7 +100,7 @@ export default function ApiKeysPage() {
         setRevokeTarget(null);
       } else {
         const data = await res.json();
-        setError(data.error?.message ?? "Failed to revoke API key");
+        setError(data.error?.message ?? t("settings.apiKeys.error.revokeFailed"));
       }
     } finally {
       setRevoking(false);
@@ -117,14 +119,14 @@ export default function ApiKeysPage() {
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold">API Keys</h1>
+          <h1 className="text-xl font-semibold">{t("settings.apiKeys.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage API keys for programmatic access. Keys use Bearer token authentication.
+            {t("settings.apiKeys.subtitle")}
           </p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="mr-1 h-4 w-4" />
-          Create Key
+          {t("settings.apiKeys.createKey")}
         </Button>
       </div>
 
@@ -135,7 +137,7 @@ export default function ApiKeysPage() {
             onClick={() => setError("")}
             className="ml-2 underline hover:no-underline"
           >
-            dismiss
+            {t("common.dismiss")}
           </button>
         </div>
       )}
@@ -149,11 +151,11 @@ export default function ApiKeysPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium">Name</th>
-                <th className="px-4 py-3 text-left font-medium">Key</th>
-                <th className="px-4 py-3 text-left font-medium">Created</th>
-                <th className="px-4 py-3 text-left font-medium">Last Used</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.apiKeys.table.name")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.apiKeys.table.key")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.apiKeys.table.created")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.apiKeys.table.lastUsed")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("settings.apiKeys.table.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -163,7 +165,10 @@ export default function ApiKeysPage() {
                     <span className="font-medium">{key.name}</span>
                     {key.expiresAt && (
                       <Badge variant="outline" className="ml-2 text-xs">
-                        Expires {new Date(key.expiresAt).toLocaleDateString()}
+                        {t("settings.apiKeys.expires")}{" "}
+                        {new Date(key.expiresAt).toLocaleDateString(
+                          language === "zh" ? "zh-CN" : "en-US"
+                        )}
                       </Badge>
                     )}
                   </td>
@@ -173,12 +178,16 @@ export default function ApiKeysPage() {
                     </code>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(key.createdAt).toLocaleDateString()}
+                    {new Date(key.createdAt).toLocaleDateString(
+                      language === "zh" ? "zh-CN" : "en-US"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {key.lastUsedAt
-                      ? new Date(key.lastUsedAt).toLocaleDateString()
-                      : "Never"}
+                      ? new Date(key.lastUsedAt).toLocaleDateString(
+                          language === "zh" ? "zh-CN" : "en-US"
+                        )
+                      : t("common.never")}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button
@@ -196,7 +205,7 @@ export default function ApiKeysPage() {
           </table>
           {keys.length === 0 && (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No API keys yet. Create one to get started.
+              {t("settings.apiKeys.empty")}
             </div>
           )}
         </div>
@@ -206,18 +215,18 @@ export default function ApiKeysPage() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create API Key</DialogTitle>
+            <DialogTitle>{t("settings.apiKeys.createDialog.title")}</DialogTitle>
             <DialogDescription>
-              Create a new API key for programmatic access to the CRM.
+              {t("settings.apiKeys.createDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="key-name">Name</Label>
+                <Label htmlFor="key-name">{t("common.name")}</Label>
                 <Input
                   id="key-name"
-                  placeholder="e.g. Claude Agent, CI Pipeline"
+                  placeholder={t("settings.apiKeys.createDialog.placeholder")}
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   autoFocus
@@ -230,11 +239,11 @@ export default function ApiKeysPage() {
                 variant="outline"
                 onClick={() => setShowCreate(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={creating || !newName.trim()}>
                 {creating && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                Create
+                {t("common.create")}
               </Button>
             </DialogFooter>
           </form>
@@ -251,9 +260,9 @@ export default function ApiKeysPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>API Key Created</DialogTitle>
+            <DialogTitle>{t("settings.apiKeys.createdDialog.title")}</DialogTitle>
             <DialogDescription>
-              Copy this key now. You won't be able to see it again.
+              {t("settings.apiKeys.createdDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -275,8 +284,8 @@ export default function ApiKeysPage() {
             <div className="flex items-start gap-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm">
               <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-yellow-600" />
               <span>
-                Store this key securely. It will not be shown again. Use it as a
-                Bearer token: <code className="text-xs">Authorization: Bearer {"<key>"}</code>
+                {t("settings.apiKeys.createdDialog.warning")}{" "}
+                <code className="text-xs">Authorization: Bearer {"<key>"}</code>
               </span>
             </div>
           </div>
@@ -287,7 +296,7 @@ export default function ApiKeysPage() {
                 setCopied(false);
               }}
             >
-              Done
+              {t("common.done")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -297,15 +306,16 @@ export default function ApiKeysPage() {
       <Dialog open={!!revokeTarget} onOpenChange={() => setRevokeTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Revoke API Key</DialogTitle>
+            <DialogTitle>{t("settings.apiKeys.revokeDialog.title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to revoke &quot;{revokeTarget?.name}&quot;? Any
-              applications using this key will lose access immediately.
+              {t("settings.apiKeys.revokeDialog.description", {
+                name: revokeTarget?.name ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRevokeTarget(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -313,7 +323,7 @@ export default function ApiKeysPage() {
               disabled={revoking}
             >
               {revoking && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-              Revoke Key
+              {t("settings.apiKeys.revokeDialog.revoke")}
             </Button>
           </DialogFooter>
         </DialogContent>

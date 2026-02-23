@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface AvailableRecord {
   id: string;
@@ -25,6 +26,7 @@ export function AddEntryModal({
   listId,
   objectName,
 }: AddEntryModalProps) {
+  const { language } = useLanguage();
   const [search, setSearch] = useState("");
   const [records, setRecords] = useState<AvailableRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +62,7 @@ export function AddEntryModal({
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-lg border border-border bg-background p-4 shadow-lg">
         <h2 className="text-sm font-semibold mb-3">
-          Add {objectName} to list
+          {language === "zh" ? `添加${objectName}到列表` : `Add ${objectName} to list`}
         </h2>
 
         {/* Search */}
@@ -69,7 +71,9 @@ export function AddEntryModal({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={`Search ${objectName}...`}
+            placeholder={
+              language === "zh" ? `搜索${objectName}...` : `Search ${objectName}...`
+            }
             className="pl-9 h-9 text-sm"
           />
         </div>
@@ -78,12 +82,12 @@ export function AddEntryModal({
         <div className="max-h-60 overflow-y-auto space-y-1">
           {loading && (
             <p className="text-xs text-muted-foreground py-4 text-center">
-              Loading...
+              {language === "zh" ? "加载中..." : "Loading..."}
             </p>
           )}
           {!loading && records.length === 0 && (
             <p className="text-xs text-muted-foreground py-4 text-center">
-              No records available to add
+              {language === "zh" ? "暂无可添加记录" : "No records available to add"}
             </p>
           )}
           {records.map((rec) => (
@@ -105,7 +109,7 @@ export function AddEntryModal({
         {/* Footer */}
         <div className="mt-3 flex justify-end">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Done
+            {language === "zh" ? "完成" : "Done"}
           </Button>
         </div>
       </div>

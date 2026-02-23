@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bell, CheckCheck, Loader2, ExternalLink } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface Notification {
   id: string;
@@ -16,6 +17,7 @@ interface Notification {
 }
 
 export default function NotificationsPage() {
+  const { language } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -58,30 +60,36 @@ export default function NotificationsPage() {
     const seconds = Math.floor(
       (Date.now() - new Date(date).getTime()) / 1000
     );
-    if (seconds < 60) return "just now";
+    if (seconds < 60) return language === "zh" ? "刚刚" : "just now";
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60)
+      return language === "zh" ? `${minutes} 分钟前` : `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24)
+      return language === "zh" ? `${hours} 小时前` : `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return language === "zh" ? `${days} 天前` : `${days}d ago`;
   }
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Notifications</h1>
+          <h1 className="text-2xl font-semibold">
+            {language === "zh" ? "通知" : "Notifications"}
+          </h1>
           {unreadCount > 0 && (
             <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-              {unreadCount} unread
+              {language === "zh"
+                ? `${unreadCount} 条未读`
+                : `${unreadCount} unread`}
             </span>
           )}
         </div>
         {unreadCount > 0 && (
           <Button variant="ghost" size="sm" onClick={handleMarkAllRead}>
             <CheckCheck className="mr-1 h-4 w-4" />
-            Mark all read
+            {language === "zh" ? "全部标为已读" : "Mark all read"}
           </Button>
         )}
       </div>
@@ -93,8 +101,10 @@ export default function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="text-lg">No notifications</p>
-          <p className="text-sm mt-1">You&apos;re all caught up</p>
+          <p className="text-lg">{language === "zh" ? "暂无通知" : "No notifications"}</p>
+          <p className="text-sm mt-1">
+            {language === "zh" ? "你已全部处理完毕" : "You&apos;re all caught up"}
+          </p>
         </div>
       ) : (
         <div className="space-y-1">

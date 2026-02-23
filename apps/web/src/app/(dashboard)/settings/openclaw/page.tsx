@@ -14,6 +14,7 @@ import {
   Terminal,
   FileText,
 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface ApiKey {
   id: string;
@@ -26,6 +27,7 @@ interface ApiKey {
 }
 
 export default function OpenClawPage() {
+  const { language } = useLanguage();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedKeyId, setSelectedKeyId] = useState<string>("");
@@ -386,9 +388,13 @@ When creating or updating records, use these value formats:
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold">OpenClaw Integration</h1>
+        <h1 className="text-xl font-semibold">
+          {language === "zh" ? "OpenClaw 集成" : "OpenClaw Integration"}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Generate a skill file to connect your OpenClaw CRM instance with{" "}
+          {language === "zh"
+            ? "生成技能文件，把你的 OpenClaw CRM 实例连接到 "
+            : "Generate a skill file to connect your OpenClaw CRM instance with "}
           <a
             href="https://openclaw.com"
             target="_blank"
@@ -398,7 +404,9 @@ When creating or updating records, use these value formats:
             OpenClaw
             <ExternalLink className="h-3 w-3" />
           </a>
-          . This lets OpenClaw agents interact with your CRM data.
+          {language === "zh"
+            ? "。这样 OpenClaw 智能体就可以直接操作你的 CRM 数据。"
+            : ". This lets OpenClaw agents interact with your CRM data."}
         </p>
       </div>
 
@@ -409,25 +417,35 @@ When creating or updating records, use these value formats:
             <Badge variant="secondary" className="text-xs font-mono">
               1
             </Badge>
-            <h2 className="font-medium">Configure</h2>
+              <h2 className="font-medium">{language === "zh" ? "配置" : "Configure"}</h2>
           </div>
 
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="instance-url">Instance URL</Label>
+              <Label htmlFor="instance-url">
+                {language === "zh" ? "实例地址" : "Instance URL"}
+              </Label>
               <Input
                 id="instance-url"
                 value={instanceUrl}
                 onChange={(e) => setInstanceUrl(e.target.value)}
-                placeholder="https://your-crm.example.com"
+                placeholder={
+                  language === "zh"
+                    ? "https://your-crm.example.com"
+                    : "https://your-crm.example.com"
+                }
               />
               <p className="text-xs text-muted-foreground">
-                The URL where your OpenClaw CRM instance is accessible.
+                {language === "zh"
+                  ? "你的 OpenClaw CRM 可访问地址。"
+                  : "The URL where your OpenClaw CRM instance is accessible."}
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="api-key">API Key</Label>
+              <Label htmlFor="api-key">
+                {language === "zh" ? "API 密钥" : "API Key"}
+              </Label>
               {apiKeys.length > 0 ? (
                 <select
                   id="api-key"
@@ -443,25 +461,27 @@ When creating or updating records, use these value formats:
                 </select>
               ) : (
                 <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-                  No API keys found.{" "}
+                  {language === "zh" ? "未找到 API Key。" : "No API keys found. "}{" "}
                   <a
                     href="/settings/api-keys"
                     className="underline hover:text-foreground"
                   >
-                    Create one first
+                    {language === "zh" ? "先创建一个" : "Create one first"}
                   </a>{" "}
-                  to use with OpenClaw.
+                  {language === "zh" ? "后再用于 OpenClaw。" : "to use with OpenClaw."}
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                The API key OpenClaw will use to authenticate. Create keys in{" "}
+                {language === "zh"
+                  ? "OpenClaw 用于鉴权的 API Key。可在 "
+                  : "The API key OpenClaw will use to authenticate. Create keys in "}{" "}
                 <a
                   href="/settings/api-keys"
                   className="underline hover:text-foreground"
                 >
-                  Settings &gt; API Keys
+                  {language === "zh" ? "设置 > API Keys" : "Settings > API Keys"}
                 </a>
-                .
+                {language === "zh" ? " 中创建。" : "."}
               </p>
             </div>
           </div>
@@ -474,7 +494,7 @@ When creating or updating records, use these value formats:
               <Badge variant="secondary" className="text-xs font-mono">
                 2
               </Badge>
-              <h2 className="font-medium">Skill File</h2>
+              <h2 className="font-medium">{language === "zh" ? "技能文件" : "Skill File"}</h2>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -487,11 +507,17 @@ When creating or updating records, use these value formats:
                 ) : (
                   <Copy className="mr-1 h-3.5 w-3.5" />
                 )}
-                {copied === "skill" ? "Copied" : "Copy"}
+                {copied === "skill"
+                  ? language === "zh"
+                    ? "已复制"
+                    : "Copied"
+                  : language === "zh"
+                    ? "复制"
+                    : "Copy"}
               </Button>
               <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="mr-1 h-3.5 w-3.5" />
-                Download
+                {language === "zh" ? "下载" : "Download"}
               </Button>
             </div>
           </div>
@@ -514,7 +540,9 @@ When creating or updating records, use these value formats:
               <Badge variant="secondary" className="text-xs font-mono">
                 3
               </Badge>
-              <h2 className="font-medium">OpenClaw Config</h2>
+              <h2 className="font-medium">
+                {language === "zh" ? "OpenClaw 配置" : "OpenClaw Config"}
+              </h2>
             </div>
             <Button
               variant="outline"
@@ -526,13 +554,26 @@ When creating or updating records, use these value formats:
               ) : (
                 <Copy className="mr-1 h-3.5 w-3.5" />
               )}
-              {copied === "config" ? "Copied" : "Copy"}
+              {copied === "config"
+                ? language === "zh"
+                  ? "已复制"
+                  : "Copied"
+                : language === "zh"
+                  ? "复制"
+                  : "Copy"}
             </Button>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Add this to your <code className="text-xs bg-muted px-1 py-0.5 rounded">openclaw.json</code> or <code className="text-xs bg-muted px-1 py-0.5 rounded">moltbot.json</code> config file.
-            Replace the API key placeholder with your actual key.
+            {language === "zh"
+              ? "把下面内容加入你的 "
+              : "Add this to your "}
+            <code className="text-xs bg-muted px-1 py-0.5 rounded">openclaw.json</code>
+            {language === "zh" ? " 或 " : " or "}
+            <code className="text-xs bg-muted px-1 py-0.5 rounded">moltbot.json</code>
+            {language === "zh"
+              ? " 配置文件，并将 API key 占位符替换为真实密钥。"
+              : " config file. Replace the API key placeholder with your actual key."}
           </p>
 
           <div className="relative">
@@ -553,7 +594,7 @@ When creating or updating records, use these value formats:
               <Badge variant="secondary" className="text-xs font-mono">
                 4
               </Badge>
-              <h2 className="font-medium">Install</h2>
+              <h2 className="font-medium">{language === "zh" ? "安装" : "Install"}</h2>
             </div>
             <Button
               variant="outline"
@@ -565,12 +606,20 @@ When creating or updating records, use these value formats:
               ) : (
                 <Copy className="mr-1 h-3.5 w-3.5" />
               )}
-              {copied === "install" ? "Copied" : "Copy"}
+              {copied === "install"
+                ? language === "zh"
+                  ? "已复制"
+                  : "Copied"
+                : language === "zh"
+                  ? "复制"
+                  : "Copy"}
             </Button>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            After downloading the SKILL.md, install it to your OpenClaw skills directory:
+            {language === "zh"
+              ? "下载 SKILL.md 后，把它安装到 OpenClaw skills 目录："
+              : "After downloading the SKILL.md, install it to your OpenClaw skills directory:"}
           </p>
 
           <div className="relative">
@@ -585,14 +634,32 @@ When creating or updating records, use these value formats:
 
           <div className="rounded-md border border-blue-500/20 bg-blue-500/5 p-3 text-sm space-y-2">
             <p className="font-medium text-blue-600 dark:text-blue-400">
-              Quick start:
+              {language === "zh" ? "快速开始：" : "Quick start:"}
             </p>
             <ol className="list-decimal pl-5 space-y-1 text-muted-foreground text-xs">
-              <li>Download the SKILL.md file above</li>
-              <li>Place it at <code className="bg-muted px-1 py-0.5 rounded">~/.openclaw/skills/openclaw/SKILL.md</code></li>
-              <li>Add the config snippet to your <code className="bg-muted px-1 py-0.5 rounded">openclaw.json</code></li>
-              <li>Set your actual API key in the config (from Settings &gt; API Keys)</li>
-              <li>Restart OpenClaw — the agent can now interact with your CRM</li>
+              <li>
+                {language === "zh"
+                  ? "下载上面的 SKILL.md 文件"
+                  : "Download the SKILL.md file above"}
+              </li>
+              <li>
+                {language === "zh" ? "放到 " : "Place it at "}
+                <code className="bg-muted px-1 py-0.5 rounded">~/.openclaw/skills/openclaw/SKILL.md</code>
+              </li>
+              <li>
+                {language === "zh" ? "把配置片段加入 " : "Add the config snippet to your "}
+                <code className="bg-muted px-1 py-0.5 rounded">openclaw.json</code>
+              </li>
+              <li>
+                {language === "zh"
+                  ? "在配置里填入真实 API key（来自 设置 > API Keys）"
+                  : "Set your actual API key in the config (from Settings > API Keys)"}
+              </li>
+              <li>
+                {language === "zh"
+                  ? "重启 OpenClaw，智能体即可操作 CRM"
+                  : "Restart OpenClaw — the agent can now interact with your CRM"}
+              </li>
             </ol>
           </div>
         </section>

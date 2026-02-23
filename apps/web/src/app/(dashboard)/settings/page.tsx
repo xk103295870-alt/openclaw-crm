@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface Workspace {
   id: string;
@@ -12,6 +13,7 @@ interface Workspace {
 }
 
 export default function SettingsPage() {
+  const { language, t } = useLanguage();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -59,12 +61,12 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-xl font-semibold mb-6">General Settings</h1>
+      <h1 className="text-xl font-semibold mb-6">{t("settings.general.title")}</h1>
 
       <div className="space-y-6">
         {/* Workspace Name */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Workspace Name</label>
+          <label className="text-sm font-medium">{t("settings.general.workspaceName")}</label>
           <input
             type="text"
             value={name}
@@ -75,7 +77,7 @@ export default function SettingsPage() {
 
         {/* Workspace Slug (read-only) */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Workspace Slug</label>
+          <label className="text-sm font-medium">{t("settings.general.workspaceSlug")}</label>
           <input
             type="text"
             value={workspace.slug}
@@ -83,13 +85,13 @@ export default function SettingsPage() {
             className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
           />
           <p className="text-xs text-muted-foreground">
-            The slug is used in URLs and cannot be changed.
+            {t("settings.general.workspaceSlugHelp")}
           </p>
         </div>
 
         {/* Workspace ID */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Workspace ID</label>
+          <label className="text-sm font-medium">{t("settings.general.workspaceId")}</label>
           <input
             type="text"
             value={workspace.id}
@@ -100,13 +102,16 @@ export default function SettingsPage() {
 
         {/* Created */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Created</label>
+          <label className="text-sm font-medium">{t("settings.general.created")}</label>
           <p className="text-sm text-muted-foreground">
-            {new Date(workspace.createdAt).toLocaleDateString(undefined, {
+            {new Date(workspace.createdAt).toLocaleDateString(
+              language === "zh" ? "zh-CN" : "en-US",
+              {
               year: "numeric",
               month: "long",
               day: "numeric",
-            })}
+            }
+            )}
           </p>
         </div>
 
@@ -117,10 +122,10 @@ export default function SettingsPage() {
             disabled={saving || name === workspace.name}
           >
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Changes
+            {t("common.saveChanges")}
           </Button>
           {saved && (
-            <span className="text-sm text-green-500">Saved</span>
+            <span className="text-sm text-green-500">{t("common.saved")}</span>
           )}
         </div>
       </div>

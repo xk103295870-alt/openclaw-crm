@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskDialog } from "./task-dialog";
+import { useLanguage } from "@/components/language-provider";
 import {
   isToday,
   isTomorrow,
@@ -49,7 +50,7 @@ interface CurrentUser {
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-function getRelativeDateLabel(deadline: string): {
+function getRelativeDateLabel(deadline: string, language: "en" | "zh"): {
   label: string;
   color: string;
 } {
@@ -57,23 +58,45 @@ function getRelativeDateLabel(deadline: string): {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  if (isToday(d)) return { label: "Due today", color: "text-orange-400" };
-  if (isTomorrow(d)) return { label: "Due tomorrow", color: "text-orange-400" };
-  if (isYesterday(d)) return { label: "Due yesterday", color: "text-destructive" };
+  if (isToday(d))
+    return {
+      label: language === "zh" ? "今天到期" : "Due today",
+      color: "text-orange-400",
+    };
+  if (isTomorrow(d))
+    return {
+      label: language === "zh" ? "明天到期" : "Due tomorrow",
+      color: "text-orange-400",
+    };
+  if (isYesterday(d))
+    return {
+      label: language === "zh" ? "昨天到期" : "Due yesterday",
+      color: "text-destructive",
+    };
 
   const days = differenceInDays(d, now);
   if (days < 0) {
     return {
-      label: `Overdue ${Math.abs(days)}d`,
+      label:
+        language === "zh"
+          ? `逾期 ${Math.abs(days)} 天`
+          : `Overdue ${Math.abs(days)}d`,
       color: "text-destructive",
     };
   }
   if (days <= 7)
     return {
-      label: `Due ${format(d, "EEEE")}`,
+      label:
+        language === "zh" ? `${format(d, "EEEE")}到期` : `Due ${format(d, "EEEE")}`,
       color: "text-orange-400",
     };
-  return { label: `Due ${format(d, "MMM d")}`, color: "text-muted-foreground" };
+  return {
+    label:
+      language === "zh"
+        ? `${format(d, "MMM d")}到期`
+        : `Due ${format(d, "MMM d")}`,
+    color: "text-muted-foreground",
+  };
 }
 
 type GroupKey =
@@ -102,16 +125,6 @@ function getGroupKey(task: Task): GroupKey {
   return "later";
 }
 
-const GROUP_LABELS: Record<GroupKey, string> = {
-  overdue: "Overdue",
-  today: "Today",
-  this_week: "This week",
-  next_week: "Next week",
-  later: "Later",
-  no_date: "No date",
-  completed: "Completed",
-};
-
 const GROUP_ORDER: GroupKey[] = [
   "overdue",
   "today",
@@ -125,6 +138,7 @@ const GROUP_ORDER: GroupKey[] = [
 // ─── Main Component ─────────────────────────────────────────────────
 
 export function TaskList() {
+  const { language } = useLanguage();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -156,15 +170,18 @@ export function TaskList() {
       } else {
         const data = await res.json().catch(() => null);
         setError(
-          data?.error?.message || `Failed to load tasks (${res.status})`
+          data?.error?.message ||
+            (language === "zh"
+              ? `加载任务失败（${res.status}）`
+              : `Failed to load tasks (${res.status})`)
         );
       }
     } catch {
-      setError("Network error — could not load tasks");
+      setError(language === "zh" ? "网络错误，无法加载任务" : "Network error — could not load tasks");
     } finally {
       setLoading(false);
     }
-  }, [showCompleted]);
+  }, [language, showCompleted]);
 
   // Fetch current user
   useEffect(() => {
@@ -226,7 +243,10 @@ export function TaskList() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        throw new Error(err?.error?.message || "Failed to create task");
+        throw new Error(
+          err?.error?.message ||
+            (language === "zh" ? "创建任务失败" : "Failed to create task")
+        );
       }
     } else if (editingTask) {
       const res = await fetch(`/api/v1/tasks/${editingTask.id}`, {
@@ -236,7 +256,10 @@ export function TaskList() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        throw new Error(err?.error?.message || "Failed to update task");
+        throw new Error(
+          err?.error?.message ||
+            (language === "zh" ? "更新任务失败" : "Failed to update task")
+        );
       }
     }
     fetchTasks();
@@ -266,22 +289,43 @@ export function TaskList() {
   }
 
   const visibleGroups = GROUP_ORDER.filter((key) => groups.has(key));
+  const GROUP_LABELS: Record<GroupKey, string> =
+    language === "zh"
+      ? {
+          overdue: "逾期",
+          today: "今天",
+          this_week: "本周",
+          next_week: "下周",
+          later: "稍后",
+          no_date: "无日期",
+          completed: "已完成",
+        }
+      : {
+          overdue: "Overdue",
+          today: "Today",
+          this_week: "This week",
+          next_week: "Next week",
+          later: "Later",
+          no_date: "No date",
+          completed: "Completed",
+        };
 
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold">Tasks</h1>
+          <h1 className="text-lg font-semibold">{language === "zh" ? "任务" : "Tasks"}</h1>
           <span className="text-sm text-muted-foreground">
-            {total} {total === 1 ? "task" : "tasks"}
+            {total}{" "}
+            {language === "zh" ? "个任务" : total === 1 ? "task" : "tasks"}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {/* Sort pill */}
           <div className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground">
             <ArrowUpDown className="h-3 w-3" />
-            <span>Due date</span>
+            <span>{language === "zh" ? "截止时间" : "Due date"}</span>
           </div>
 
           <Button
@@ -295,21 +339,27 @@ export function TaskList() {
             ) : (
               <Eye className="h-3.5 w-3.5" />
             )}
-            {showCompleted ? "Hide completed" : "Show completed"}
+            {showCompleted
+              ? language === "zh"
+                ? "隐藏已完成"
+                : "Hide completed"
+              : language === "zh"
+                ? "显示已完成"
+                : "Show completed"}
           </Button>
           <Button size="sm" onClick={openCreateDialog}>
             <Plus className="mr-1 h-4 w-4" />
-            New task
+            {language === "zh" ? "新建任务" : "New task"}
           </Button>
         </div>
       </div>
 
       {/* Column headers */}
       <div className="grid grid-cols-[1fr_120px_150px_120px] gap-2 border-b border-border px-4 py-1.5 text-xs font-medium text-muted-foreground">
-        <span>Task</span>
-        <span>Due date</span>
-        <span>Record</span>
-        <span>Assigned to</span>
+        <span>{language === "zh" ? "任务" : "Task"}</span>
+        <span>{language === "zh" ? "截止时间" : "Due date"}</span>
+        <span>{language === "zh" ? "关联记录" : "Record"}</span>
+        <span>{language === "zh" ? "负责人" : "Assigned to"}</span>
       </div>
 
       {/* Error */}
@@ -322,17 +372,21 @@ export function TaskList() {
       {/* Task list */}
       <div className="flex-1 overflow-auto">
         {loading && tasks.length === 0 && (
-          <p className="text-muted-foreground text-center py-12">Loading...</p>
+          <p className="text-muted-foreground text-center py-12">
+            {language === "zh" ? "加载中..." : "Loading..."}
+          </p>
         )}
 
         {!loading && tasks.length === 0 && (
           <div className="text-center py-12 space-y-2">
             <p className="text-muted-foreground">
-              No tasks yet! Create your first task to get started.
+              {language === "zh"
+                ? "还没有任务，创建第一条任务开始吧。"
+                : "No tasks yet! Create your first task to get started."}
             </p>
             <Button size="sm" variant="outline" onClick={openCreateDialog}>
               <Plus className="mr-1 h-4 w-4" />
-              New task
+              {language === "zh" ? "新建任务" : "New task"}
             </Button>
           </div>
         )}
@@ -371,6 +425,7 @@ export function TaskList() {
                   <TaskRow
                     key={task.id}
                     task={task}
+                    language={language}
                     onToggle={() => toggleComplete(task.id, task.isCompleted)}
                     onClick={() => openEditDialog(task)}
                   />
@@ -412,15 +467,17 @@ export function TaskList() {
 
 function TaskRow({
   task,
+  language,
   onToggle,
   onClick,
 }: {
   task: Task;
+  language: "en" | "zh";
   onToggle: () => void;
   onClick: () => void;
 }) {
   const dateInfo = task.deadline
-    ? getRelativeDateLabel(task.deadline)
+    ? getRelativeDateLabel(task.deadline, language)
     : null;
 
   return (

@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { parseCSV, type ParsedCSV } from "@/lib/csv-utils";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeDef {
   slug: string;
@@ -41,6 +42,7 @@ export function CSVImportModal({
   attributes,
   onImportComplete,
 }: CSVImportModalProps) {
+  const { language } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<"upload" | "map" | "importing" | "done">("upload");
   const [parsed, setParsed] = useState<ParsedCSV | null>(null);
@@ -196,7 +198,14 @@ export function CSVImportModal({
         const err = await res.json();
         setResult({
           created: 0,
-          errors: [{ row: -1, message: err.error?.message ?? "Import failed" }],
+          errors: [
+            {
+              row: -1,
+              message:
+                err.error?.message ??
+                (language === "zh" ? "导入失败" : "Import failed"),
+            },
+          ],
           total: rows.length,
         });
         setStep("done");
@@ -204,7 +213,12 @@ export function CSVImportModal({
     } catch {
       setResult({
         created: 0,
-        errors: [{ row: -1, message: "Network error" }],
+        errors: [
+          {
+            row: -1,
+            message: language === "zh" ? "网络错误" : "Network error",
+          },
+        ],
         total: parsed.rows.length,
       });
       setStep("done");
@@ -218,7 +232,11 @@ export function CSVImportModal({
     <Dialog open={open} onOpenChange={() => handleClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import {objectName} Records</DialogTitle>
+          <DialogTitle>
+            {language === "zh"
+              ? `导入${objectName}记录`
+              : `Import ${objectName} Records`}
+          </DialogTitle>
         </DialogHeader>
 
         {/* Step 1: Upload */}
@@ -238,17 +256,21 @@ export function CSVImportModal({
           >
             <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="text-sm font-medium mb-1">
-              Drop a CSV file here, or click to browse
+              {language === "zh"
+                ? "将 CSV 文件拖拽到此处，或点击选择文件"
+                : "Drop a CSV file here, or click to browse"}
             </p>
             <p className="text-xs text-muted-foreground mb-4">
-              Maximum 1,000 rows per import
+              {language === "zh"
+                ? "每次导入最多 1,000 行"
+                : "Maximum 1,000 rows per import"}
             </p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => fileRef.current?.click()}
             >
-              Choose File
+              {language === "zh" ? "选择文件" : "Choose File"}
             </Button>
             <input
               ref={fileRef}
@@ -268,8 +290,9 @@ export function CSVImportModal({
               <span>{fileName}</span>
               <span>&mdash;</span>
               <span>
-                {parsed.rows.length} row{parsed.rows.length !== 1 ? "s" : ""},{" "}
-                {parsed.headers.length} column{parsed.headers.length !== 1 ? "s" : ""}
+                {language === "zh"
+                  ? `${parsed.rows.length} 行，${parsed.headers.length} 列`
+                  : `${parsed.rows.length} row${parsed.rows.length !== 1 ? "s" : ""}, ${parsed.headers.length} column${parsed.headers.length !== 1 ? "s" : ""}`}
               </span>
             </div>
 
@@ -278,9 +301,15 @@ export function CSVImportModal({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-3 py-2 text-left font-medium">CSV Column</th>
-                    <th className="px-3 py-2 text-left font-medium">Maps To</th>
-                    <th className="px-3 py-2 text-left font-medium">Preview</th>
+                    <th className="px-3 py-2 text-left font-medium">
+                      {language === "zh" ? "CSV 列" : "CSV Column"}
+                    </th>
+                    <th className="px-3 py-2 text-left font-medium">
+                      {language === "zh" ? "映射到" : "Maps To"}
+                    </th>
+                    <th className="px-3 py-2 text-left font-medium">
+                      {language === "zh" ? "预览" : "Preview"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -293,7 +322,9 @@ export function CSVImportModal({
                           onChange={(e) => updateMapping(i, e.target.value)}
                           className="w-full rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                         >
-                          <option value="">-- Skip --</option>
+                          <option value="">
+                            {language === "zh" ? "-- 跳过 --" : "-- Skip --"}
+                          </option>
                           {attributes.map((attr) => (
                             <option key={attr.slug} value={attr.slug}>
                               {attr.title} ({attr.type})
@@ -314,7 +345,9 @@ export function CSVImportModal({
             {previewRows.length > 1 && (
               <details className="text-xs">
                 <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                  Preview first {previewRows.length} rows
+                  {language === "zh"
+                    ? `预览前 ${previewRows.length} 行`
+                    : `Preview first ${previewRows.length} rows`}
                 </summary>
                 <div className="mt-2 overflow-x-auto border rounded-lg">
                   <table className="w-full text-xs">
@@ -355,9 +388,13 @@ export function CSVImportModal({
         {step === "importing" && (
           <div className="py-8 text-center">
             <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-primary" />
-            <p className="text-sm font-medium">Importing records...</p>
+            <p className="text-sm font-medium">
+              {language === "zh" ? "正在导入记录..." : "Importing records..."}
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
-              This may take a moment for large files
+              {language === "zh"
+                ? "文件较大时可能需要一些时间"
+                : "This may take a moment for large files"}
             </p>
           </div>
         )}
@@ -371,22 +408,32 @@ export function CSVImportModal({
               <AlertCircle className="h-10 w-10 mx-auto text-destructive" />
             )}
             <p className="text-sm font-medium">
-              {result.created} of {result.total} records imported
+              {language === "zh"
+                ? `已导入 ${result.created} / ${result.total} 条记录`
+                : `${result.created} of ${result.total} records imported`}
             </p>
             {result.errors.length > 0 && (
               <div className="text-left mt-4 max-h-40 overflow-y-auto rounded border border-destructive/30 p-3">
                 <p className="text-xs font-medium text-destructive mb-1">
-                  {result.errors.length} error{result.errors.length !== 1 ? "s" : ""}:
+                  {language === "zh"
+                    ? `${result.errors.length} 个错误：`
+                    : `${result.errors.length} error${result.errors.length !== 1 ? "s" : ""}:`}
                 </p>
                 {result.errors.slice(0, 20).map((err, i) => (
                   <p key={i} className="text-xs text-muted-foreground">
-                    {err.row >= 0 ? `Row ${err.row + 1}: ` : ""}
+                    {err.row >= 0
+                      ? language === "zh"
+                        ? `第 ${err.row + 1} 行：`
+                        : `Row ${err.row + 1}: `
+                      : ""}
                     {err.message}
                   </p>
                 ))}
                 {result.errors.length > 20 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    ...and {result.errors.length - 20} more errors
+                    {language === "zh"
+                      ? `...以及另外 ${result.errors.length - 20} 个错误`
+                      : `...and ${result.errors.length - 20} more errors`}
                   </p>
                 )}
               </div>
@@ -397,29 +444,35 @@ export function CSVImportModal({
         <DialogFooter>
           {step === "upload" && (
             <Button variant="ghost" onClick={handleClose}>
-              Cancel
+              {language === "zh" ? "取消" : "Cancel"}
             </Button>
           )}
           {step === "map" && (
             <>
               <Button variant="ghost" onClick={reset}>
-                Back
+                {language === "zh" ? "返回" : "Back"}
               </Button>
               <Button
                 onClick={handleImport}
                 disabled={mappedCount === 0}
               >
-                Import {parsed?.rows.length ?? 0} Records
+                {language === "zh"
+                  ? `导入 ${parsed?.rows.length ?? 0} 条记录`
+                  : `Import ${parsed?.rows.length ?? 0} Records`}
                 {mappedCount > 0 && (
                   <span className="ml-1 text-xs opacity-70">
-                    ({mappedCount} column{mappedCount !== 1 ? "s" : ""} mapped)
+                    {language === "zh"
+                      ? `(${mappedCount} 列已映射)`
+                      : `(${mappedCount} column${mappedCount !== 1 ? "s" : ""} mapped)`}
                   </span>
                 )}
               </Button>
             </>
           )}
           {step === "done" && (
-            <Button onClick={handleClose}>Close</Button>
+            <Button onClick={handleClose}>
+              {language === "zh" ? "关闭" : "Close"}
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>

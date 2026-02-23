@@ -41,7 +41,9 @@ export default function RegisterPage() {
       }
 
       // Create workspace for the new user
-      const wsName = workspaceName.trim() || `${name}'s Workspace`;
+      const wsName =
+        workspaceName.trim() ||
+        t("auth.register.workspaceNameFromName", { name: name || "My" });
       const wsRes = await fetch("/api/v1/workspaces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -140,7 +142,7 @@ export default function RegisterPage() {
             type="text"
             placeholder={
               name
-                ? `${name}'s Workspace`
+                ? t("auth.register.workspaceNameFromName", { name })
                 : t("auth.register.workspaceNamePlaceholderFallback")
             }
             value={workspaceName}

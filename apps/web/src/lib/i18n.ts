@@ -1,4 +1,8 @@
 export type Language = "en" | "zh";
+export type TranslationParams = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
@@ -50,6 +54,7 @@ const translations: Record<Language, Record<string, string>> = {
     "auth.register.workspaceName": "Workspace name",
     "auth.register.workspaceNamePlaceholderFallback": "My Workspace",
     "auth.register.workspaceNameHint": "Leave blank to use your name",
+    "auth.register.workspaceNameFromName": "{{name}} Workspace",
     "auth.register.submit": "Create account",
     "auth.register.submitting": "Creating account...",
     "auth.register.haveAccount": "Already have an account?",
@@ -85,6 +90,97 @@ const translations: Record<Language, Record<string, string>> = {
     "commandPalette.group.searchResults": "Search Results",
     "commandPalette.group.pages": "Pages",
     "commandPalette.viewAll": "View all results for",
+
+    "common.add": "Add",
+    "common.cancel": "Cancel",
+    "common.create": "Create",
+    "common.dismiss": "Dismiss",
+    "common.done": "Done",
+    "common.name": "Name",
+    "common.networkError": "Network error. Please try again.",
+    "common.never": "Never",
+    "common.save": "Save",
+    "common.saveChanges": "Save changes",
+    "common.saved": "Saved",
+
+    "settings.nav.general": "General",
+    "settings.nav.members": "Members",
+    "settings.nav.objects": "Objects",
+    "settings.nav.apiKeys": "API Keys",
+    "settings.nav.aiAgent": "AI Agent",
+    "settings.nav.openclaw": "OpenClaw",
+
+    "settings.general.title": "General settings",
+    "settings.general.workspaceName": "Workspace name",
+    "settings.general.workspaceSlug": "Workspace slug",
+    "settings.general.workspaceSlugHelp": "Used in URLs and cannot be changed now.",
+    "settings.general.workspaceId": "Workspace ID",
+    "settings.general.created": "Created",
+
+    "settings.members.title": "Members",
+    "settings.members.addByEmail": "Add member by email",
+    "settings.members.table.user": "User",
+    "settings.members.table.role": "Role",
+    "settings.members.table.joined": "Joined",
+    "settings.members.table.actions": "Actions",
+    "settings.members.empty": "No members yet",
+    "settings.members.error.addFailed": "Failed to add member",
+    "settings.members.error.changeRoleFailed": "Failed to update role",
+    "settings.members.error.removeFailed": "Failed to remove member",
+
+    "settings.objects.title": "Object settings",
+    "settings.objects.system": "System",
+    "settings.objects.table.title": "Title",
+    "settings.objects.table.slug": "Slug",
+    "settings.objects.table.type": "Type",
+    "settings.objects.table.actions": "Actions",
+    "settings.objects.field.title": "Title",
+    "settings.objects.field.slug": "Slug",
+    "settings.objects.field.type": "Type",
+    "settings.objects.placeholder.attributeTitle": "e.g. Stage",
+    "settings.objects.placeholder.attributeSlug": "e.g. stage",
+    "settings.objects.emptyAttributes": "No attributes yet",
+    "settings.objects.error.addAttributeFailed": "Failed to add attribute",
+    "settings.objects.error.deleteAttributeFailed": "Failed to delete attribute",
+
+    "settings.apiKeys.title": "API keys",
+    "settings.apiKeys.subtitle": "Manage API keys used for external integrations",
+    "settings.apiKeys.createKey": "Create key",
+    "settings.apiKeys.table.name": "Name",
+    "settings.apiKeys.table.key": "Key",
+    "settings.apiKeys.table.created": "Created",
+    "settings.apiKeys.table.lastUsed": "Last used",
+    "settings.apiKeys.table.actions": "Actions",
+    "settings.apiKeys.expires": "Expires",
+    "settings.apiKeys.empty": "No API keys yet",
+    "settings.apiKeys.error.createFailed": "Failed to create API key",
+    "settings.apiKeys.error.revokeFailed": "Failed to revoke API key",
+    "settings.apiKeys.createDialog.title": "Create API key",
+    "settings.apiKeys.createDialog.description":
+      "Give this key a name to identify where it is used.",
+    "settings.apiKeys.createDialog.placeholder": "e.g. Backend integration",
+    "settings.apiKeys.createdDialog.title": "API key created",
+    "settings.apiKeys.createdDialog.description":
+      "Copy this key now. You will not be able to view it again.",
+    "settings.apiKeys.createdDialog.warning":
+      "Store this key securely. It grants access to your workspace API.",
+    "settings.apiKeys.revokeDialog.title": "Revoke API key",
+    "settings.apiKeys.revokeDialog.description":
+      "Revoke {{name}}? This action cannot be undone.",
+    "settings.apiKeys.revokeDialog.revoke": "Revoke",
+
+    "settings.ai.title": "AI Agent settings",
+    "settings.ai.subtitle":
+      "Configure OpenRouter API key and default model for AI features.",
+    "settings.ai.apiKey": "OpenRouter API key",
+    "settings.ai.apiKeyPlaceholder": "sk-or-v1-...",
+    "settings.ai.apiKeySetHint":
+      "API key is already set. Enter a new key only if you want to replace it.",
+    "settings.ai.apiKeyHint": "Generate a key at",
+    "settings.ai.model": "Default model",
+    "settings.ai.testConnection": "Test connection",
+    "settings.ai.test.success": "Connection successful",
+    "settings.ai.test.failed": "Connection failed",
   },
   zh: {
     "nav.home": "首页",
@@ -105,7 +201,7 @@ const translations: Record<Language, Record<string, string>> = {
     "theme.dark": "暗色模式",
 
     "language.toggleToZh": "切换到中文",
-    "language.toggleToEn": "Switch to English",
+    "language.toggleToEn": "切换到英文",
     "language.short.zh": "中",
     "language.short.en": "EN",
 
@@ -135,6 +231,7 @@ const translations: Record<Language, Record<string, string>> = {
     "auth.register.workspaceName": "工作区名称",
     "auth.register.workspaceNamePlaceholderFallback": "我的工作区",
     "auth.register.workspaceNameHint": "留空将使用你的名字",
+    "auth.register.workspaceNameFromName": "{{name}}的工作区",
     "auth.register.submit": "创建账号",
     "auth.register.submitting": "创建中...",
     "auth.register.haveAccount": "已有账号？",
@@ -170,11 +267,106 @@ const translations: Record<Language, Record<string, string>> = {
     "commandPalette.group.searchResults": "搜索结果",
     "commandPalette.group.pages": "页面",
     "commandPalette.viewAll": "查看全部结果：",
+
+    "common.add": "添加",
+    "common.cancel": "取消",
+    "common.create": "创建",
+    "common.dismiss": "关闭",
+    "common.done": "完成",
+    "common.name": "名称",
+    "common.networkError": "网络错误，请重试。",
+    "common.never": "从未",
+    "common.save": "保存",
+    "common.saveChanges": "保存更改",
+    "common.saved": "已保存",
+
+    "settings.nav.general": "常规",
+    "settings.nav.members": "成员",
+    "settings.nav.objects": "对象",
+    "settings.nav.apiKeys": "API 密钥",
+    "settings.nav.aiAgent": "AI 助手",
+    "settings.nav.openclaw": "OpenClaw",
+
+    "settings.general.title": "常规设置",
+    "settings.general.workspaceName": "工作区名称",
+    "settings.general.workspaceSlug": "工作区 slug",
+    "settings.general.workspaceSlugHelp": "用于 URL，当前不可修改。",
+    "settings.general.workspaceId": "工作区 ID",
+    "settings.general.created": "创建时间",
+
+    "settings.members.title": "成员管理",
+    "settings.members.addByEmail": "通过邮箱添加成员",
+    "settings.members.table.user": "用户",
+    "settings.members.table.role": "角色",
+    "settings.members.table.joined": "加入时间",
+    "settings.members.table.actions": "操作",
+    "settings.members.empty": "暂无成员",
+    "settings.members.error.addFailed": "添加成员失败",
+    "settings.members.error.changeRoleFailed": "修改角色失败",
+    "settings.members.error.removeFailed": "移除成员失败",
+
+    "settings.objects.title": "对象设置",
+    "settings.objects.system": "系统",
+    "settings.objects.table.title": "标题",
+    "settings.objects.table.slug": "Slug",
+    "settings.objects.table.type": "类型",
+    "settings.objects.table.actions": "操作",
+    "settings.objects.field.title": "标题",
+    "settings.objects.field.slug": "Slug",
+    "settings.objects.field.type": "类型",
+    "settings.objects.placeholder.attributeTitle": "例如：阶段",
+    "settings.objects.placeholder.attributeSlug": "例如：stage",
+    "settings.objects.emptyAttributes": "暂无字段",
+    "settings.objects.error.addAttributeFailed": "添加字段失败",
+    "settings.objects.error.deleteAttributeFailed": "删除字段失败",
+
+    "settings.apiKeys.title": "API 密钥",
+    "settings.apiKeys.subtitle": "管理用于外部集成的 API 密钥",
+    "settings.apiKeys.createKey": "创建密钥",
+    "settings.apiKeys.table.name": "名称",
+    "settings.apiKeys.table.key": "密钥",
+    "settings.apiKeys.table.created": "创建时间",
+    "settings.apiKeys.table.lastUsed": "最近使用",
+    "settings.apiKeys.table.actions": "操作",
+    "settings.apiKeys.expires": "到期",
+    "settings.apiKeys.empty": "暂无 API 密钥",
+    "settings.apiKeys.error.createFailed": "创建 API 密钥失败",
+    "settings.apiKeys.error.revokeFailed": "吊销 API 密钥失败",
+    "settings.apiKeys.createDialog.title": "创建 API 密钥",
+    "settings.apiKeys.createDialog.description": "为该密钥设置名称，便于识别其用途。",
+    "settings.apiKeys.createDialog.placeholder": "例如：后端服务",
+    "settings.apiKeys.createdDialog.title": "API 密钥已创建",
+    "settings.apiKeys.createdDialog.description": "请立即复制该密钥，关闭后将无法再次查看。",
+    "settings.apiKeys.createdDialog.warning":
+      "请妥善保管该密钥，它可访问你的工作区 API。",
+    "settings.apiKeys.revokeDialog.title": "吊销 API 密钥",
+    "settings.apiKeys.revokeDialog.description": "确定要吊销 {{name}} 吗？此操作不可撤销。",
+    "settings.apiKeys.revokeDialog.revoke": "吊销",
+
+    "settings.ai.title": "AI 助手设置",
+    "settings.ai.subtitle": "配置 OpenRouter API 密钥和默认模型，用于 AI 功能。",
+    "settings.ai.apiKey": "OpenRouter API 密钥",
+    "settings.ai.apiKeyPlaceholder": "sk-or-v1-...",
+    "settings.ai.apiKeySetHint": "已设置 API 密钥。如需替换，请输入新密钥。",
+    "settings.ai.apiKeyHint": "可在这里生成密钥：",
+    "settings.ai.model": "默认模型",
+    "settings.ai.testConnection": "测试连接",
+    "settings.ai.test.success": "连接成功",
+    "settings.ai.test.failed": "连接失败",
   },
 };
 
-export function translate(language: Language, key: string): string {
+export function translate(
+  language: Language,
+  key: string,
+  params?: TranslationParams
+): string {
   const dict = translations[language];
-  return dict?.[key] ?? key;
+  const template = dict?.[key] ?? key;
+  if (!params) return template;
+  return template.replace(/\{\{(\w+)\}\}/g, (_, token: string) => {
+    const value = params[token];
+    return value === undefined || value === null ? "" : String(value);
+  });
 }
 

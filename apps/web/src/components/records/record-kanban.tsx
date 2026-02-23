@@ -19,6 +19,7 @@ import type { AttributeType } from "@openclaw-crm/shared";
 import { cn } from "@/lib/utils";
 import { GripVertical } from "lucide-react";
 import { extractPersonalName } from "@/lib/display-name";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ export function RecordKanban({
   onClickRecord,
   objectSlug,
 }: RecordKanbanProps) {
+  const { language } = useLanguage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [insertInfo, setInsertInfo] = useState<InsertInfo | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -261,7 +263,7 @@ export function RecordKanban({
         {(columnMap.get("_unset")?.length ?? 0) > 0 && (
           <KanbanColumn
             id="_unset"
-            title="No Status"
+            title={language === "zh" ? "无状态" : "No Status"}
             color="#666"
             records={columnMap.get("_unset") || []}
             nameAttr={nameAttr}
@@ -270,6 +272,7 @@ export function RecordKanban({
             onClickRecord={onClickRecord}
             insertInfo={insertInfo}
             activeId={activeId}
+            language={language}
           />
         )}
 
@@ -286,6 +289,7 @@ export function RecordKanban({
             onClickRecord={onClickRecord}
             insertInfo={insertInfo}
             activeId={activeId}
+            language={language}
           />
         ))}
       </div>
@@ -295,6 +299,7 @@ export function RecordKanban({
           <KanbanCardOverlay
             record={activeRecord}
             nameAttr={nameAttr}
+            language={language}
             currencyAttr={currencyAttr}
             attributes={attributes}
           />
@@ -317,6 +322,7 @@ function KanbanColumn({
   onClickRecord,
   insertInfo,
   activeId,
+  language,
 }: {
   id: string;
   title: string;
@@ -328,6 +334,7 @@ function KanbanColumn({
   onClickRecord: (recordId: string) => void;
   insertInfo: InsertInfo | null;
   activeId: string | null;
+  language: "en" | "zh";
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -385,6 +392,7 @@ function KanbanColumn({
             <KanbanCard
               record={record}
               nameAttr={nameAttr}
+              language={language}
               currencyAttr={currencyAttr}
               attributes={attributes}
               onClick={() => onClickRecord(record.id)}
@@ -395,7 +403,7 @@ function KanbanColumn({
 
         {visibleRecords.length === 0 && !showInsert && (
           <div className="py-8 text-center text-xs text-muted-foreground/50">
-            Drop here
+            {language === "zh" ? "拖到这里" : "Drop here"}
           </div>
         )}
         {visibleRecords.length === 0 && showInsert && <InsertIndicator />}
@@ -421,12 +429,14 @@ function InsertIndicator() {
 function KanbanCard({
   record,
   nameAttr,
+  language,
   currencyAttr,
   attributes,
   onClick,
 }: {
   record: RecordRow;
   nameAttr?: AttributeDef;
+  language: "en" | "zh";
   currencyAttr?: AttributeDef;
   attributes: AttributeDef[];
   onClick: () => void;
@@ -438,7 +448,7 @@ function KanbanCard({
     isDragging,
   } = useDraggable({ id: record.id });
 
-  const displayName = getDisplayName(record, nameAttr);
+  const displayName = getDisplayName(record, nameAttr, language);
   const currencyVal = currencyAttr
     ? (record.values[currencyAttr.slug] as { amount?: number; currencyCode?: string } | undefined)
     : undefined;
@@ -506,15 +516,17 @@ function KanbanCard({
 function KanbanCardOverlay({
   record,
   nameAttr,
+  language,
   currencyAttr,
   attributes,
 }: {
   record: RecordRow;
   nameAttr?: AttributeDef;
+  language: "en" | "zh";
   currencyAttr?: AttributeDef;
   attributes: AttributeDef[];
 }) {
-  const displayName = getDisplayName(record, nameAttr);
+  const displayName = getDisplayName(record, nameAttr, language);
   const currencyVal = currencyAttr
     ? (record.values[currencyAttr.slug] as { amount?: number; currencyCode?: string } | undefined)
     : undefined;
@@ -536,12 +548,16 @@ function KanbanCardOverlay({
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-function getDisplayName(record: RecordRow, nameAttr?: AttributeDef): string {
-  if (!nameAttr) return "Unnamed";
+function getDisplayName(
+  record: RecordRow,
+  nameAttr?: AttributeDef,
+  language: "en" | "zh" = "en"
+): string {
+  if (!nameAttr) return language === "zh" ? "未命名" : "Unnamed";
   const val = record.values[nameAttr.slug];
-  if (!val) return "Unnamed";
+  if (!val) return language === "zh" ? "未命名" : "Unnamed";
   if (nameAttr.type === "personal_name") {
-    return extractPersonalName(val) || "Unnamed";
+    return extractPersonalName(val) || (language === "zh" ? "未命名" : "Unnamed");
   }
   return String(val);
 }

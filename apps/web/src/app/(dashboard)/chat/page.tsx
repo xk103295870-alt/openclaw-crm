@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ConversationList } from "@/components/chat/conversation-list";
 import { MessageList } from "@/components/chat/message-list";
 import { ChatInput } from "@/components/chat/chat-input";
+import { useLanguage } from "@/components/language-provider";
 
 interface Conversation {
   id: string;
@@ -37,6 +38,7 @@ interface PendingToolCall {
 }
 
 export default function ChatPage() {
+  const { language } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -147,7 +149,10 @@ export default function ChatPage() {
           break;
 
         case "tool_executing":
-          accumulatedRef.current += `\n\u{1F527} Running **${parsed.name}**...\n`;
+          accumulatedRef.current +=
+            language === "zh"
+              ? `\n\u{1F527} 正在执行 **${parsed.name}**...\n`
+              : `\n\u{1F527} Running **${parsed.name}**...\n`;
           setStreamingContent(accumulatedRef.current);
           break;
 
@@ -164,7 +169,10 @@ export default function ChatPage() {
           break;
 
         case "error":
-          accumulatedRef.current += `\n\nError: ${parsed.error}`;
+          accumulatedRef.current +=
+            language === "zh"
+              ? `\n\n错误：${parsed.error}`
+              : `\n\nError: ${parsed.error}`;
           setStreamingContent(accumulatedRef.current);
           break;
       }
@@ -256,7 +264,9 @@ export default function ChatPage() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         setStreamingContent(
-          `Error: ${(err as { error?: { message?: string } }).error?.message || "Failed to get response"}`
+          language === "zh"
+            ? `错误：${(err as { error?: { message?: string } }).error?.message || "获取回复失败"}`
+            : `Error: ${(err as { error?: { message?: string } }).error?.message || "Failed to get response"}`
         );
         setStreaming(false);
         isStreamingRef.current = false;
@@ -268,7 +278,11 @@ export default function ChatPage() {
       if (e instanceof DOMException && e.name === "AbortError") {
         // User cancelled
       } else {
-        setStreamingContent("Connection error. Please try again.");
+        setStreamingContent(
+          language === "zh"
+            ? "连接错误，请重试。"
+            : "Connection error. Please try again."
+        );
       }
     }
 

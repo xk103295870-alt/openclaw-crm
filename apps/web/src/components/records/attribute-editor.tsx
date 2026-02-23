@@ -5,6 +5,7 @@ import type { AttributeType } from "@openclaw-crm/shared";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Check, Star, Building2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeEditorProps {
   type: AttributeType;
@@ -283,6 +284,7 @@ function PersonalNameEditor({ value, onSave, onCancel }: {
   onSave: (v: unknown) => void;
   onCancel: () => void;
 }) {
+  const { language } = useLanguage();
   const [first, setFirst] = useState(value?.firstName ?? "");
   const [last, setLast] = useState(value?.lastName ?? "");
   const firstRef = useRef<HTMLInputElement>(null);
@@ -304,7 +306,7 @@ function PersonalNameEditor({ value, onSave, onCancel }: {
         ref={firstRef}
         value={first}
         onChange={(e) => setFirst(e.target.value)}
-        placeholder="First"
+        placeholder={language === "zh" ? "名" : "First"}
         onKeyDown={(e) => {
           if (e.key === "Enter") save();
           if (e.key === "Escape") onCancel();
@@ -314,7 +316,7 @@ function PersonalNameEditor({ value, onSave, onCancel }: {
       <Input
         value={last}
         onChange={(e) => setLast(e.target.value)}
-        placeholder="Last"
+        placeholder={language === "zh" ? "姓" : "Last"}
         onBlur={save}
         onKeyDown={(e) => {
           if (e.key === "Enter") save();
@@ -337,6 +339,7 @@ function RecordReferenceEditor({ value, onSave, onCancel }: {
   onSave: (v: unknown) => void;
   onCancel: () => void;
 }) {
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<
     { recordId: string; displayName: string; objectSlug: string; objectName: string }[]
@@ -410,16 +413,20 @@ function RecordReferenceEditor({ value, onSave, onCancel }: {
           onKeyDown={(e) => {
             if (e.key === "Escape") onCancel();
           }}
-          placeholder="Search records..."
+          placeholder={language === "zh" ? "搜索记录..." : "Search records..."}
           className="h-7 text-sm"
         />
       </div>
       <div className="max-h-48 overflow-auto p-1">
         {loading && results.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-3">Loading...</p>
+          <p className="text-xs text-muted-foreground text-center py-3">
+            {language === "zh" ? "加载中..." : "Loading..."}
+          </p>
         )}
         {!loading && results.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-3">No records found</p>
+          <p className="text-xs text-muted-foreground text-center py-3">
+            {language === "zh" ? "未找到记录" : "No records found"}
+          </p>
         )}
         {/* Clear option */}
         {value && (
@@ -427,7 +434,7 @@ function RecordReferenceEditor({ value, onSave, onCancel }: {
             onClick={() => onSave(null)}
             className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent mb-0.5"
           >
-            Clear
+            {language === "zh" ? "清空" : "Clear"}
           </button>
         )}
         {results.map((rec) => (

@@ -1,34 +1,65 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { Language } from "@/lib/i18n";
 
-const examples = [
-  {
-    query: "Show me deals closing this month",
-    answer:
-      "Found 3 deals closing before Feb 28. Northwind ($89k, Negotiation), Horizon Enterprise ($156k, Negotiation), and Atlas Rebrand ($67.5k, Won).",
-    highlight: "3 deals",
-  },
-  {
-    query: "Add a follow-up note to Sarah Chen",
-    answer: "Done. Added note to Sarah Chen at Meridian Health Group.",
-    highlight: "Sarah Chen",
-  },
-  {
-    query: "What's my total pipeline value?",
-    answer:
-      "Your active pipeline is $1.38M across 10 deals. 2 won, 2 in negotiation, 2 at proposal stage.",
-    highlight: "$1.38M",
-  },
-  {
-    query: "Who are the contacts at Sterling & Co?",
-    answer:
-      "2 contacts. Alex Dumont (Senior Consultant) and Omar Hassan (Principal Consultant).",
-    highlight: "2 contacts",
-  },
-];
+function getExamples(language: Language) {
+  if (language === "zh") {
+    return [
+      {
+        query: "帮我看一下本月即将成交的商机",
+        answer:
+          "找到 3 个将在 2 月 28 日前成交的商机：Northwind（$89k，谈判中）、Horizon Enterprise（$156k，谈判中）、Atlas Rebrand（$67.5k，已赢单）。",
+        highlight: "3 个",
+      },
+      {
+        query: "给 Sarah Chen 添加一条跟进备注",
+        answer: "已完成。备注已添加到 Meridian Health Group 的 Sarah Chen。",
+        highlight: "Sarah Chen",
+      },
+      {
+        query: "当前总销售管道金额是多少？",
+        answer:
+          "当前活跃销售管道为 $1.38M，共 10 个商机：2 个已赢单、2 个谈判中、2 个提案阶段。",
+        highlight: "$1.38M",
+      },
+      {
+        query: "Sterling & Co 有哪些联系人？",
+        answer: "共 2 位联系人：Alex Dumont（高级顾问）和 Omar Hassan（首席顾问）。",
+        highlight: "2 位",
+      },
+    ];
+  }
 
-export function RotatingChat() {
+  return [
+    {
+      query: "Show me deals closing this month",
+      answer:
+        "Found 3 deals closing before Feb 28. Northwind ($89k, Negotiation), Horizon Enterprise ($156k, Negotiation), and Atlas Rebrand ($67.5k, Won).",
+      highlight: "3 deals",
+    },
+    {
+      query: "Add a follow-up note to Sarah Chen",
+      answer: "Done. Added note to Sarah Chen at Meridian Health Group.",
+      highlight: "Sarah Chen",
+    },
+    {
+      query: "What's my total pipeline value?",
+      answer:
+        "Your active pipeline is $1.38M across 10 deals. 2 won, 2 in negotiation, 2 at proposal stage.",
+      highlight: "$1.38M",
+    },
+    {
+      query: "Who are the contacts at Sterling & Co?",
+      answer:
+        "2 contacts. Alex Dumont (Senior Consultant) and Omar Hassan (Principal Consultant).",
+      highlight: "2 contacts",
+    },
+  ];
+}
+
+export function RotatingChat({ language }: { language: Language }) {
+  const examples = getExamples(language);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<"query" | "answer" | "idle">("query");
   const [visible, setVisible] = useState(true);

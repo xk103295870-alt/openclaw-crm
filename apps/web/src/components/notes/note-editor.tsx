@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 import {
   Bold,
   Italic,
@@ -29,17 +30,21 @@ interface NoteEditorProps {
 export function NoteEditor({
   content,
   onChange,
-  placeholder = "Start writing...",
+  placeholder,
   className,
   editable = true,
 }: NoteEditorProps) {
+  const { language } = useLanguage();
+  const resolvedPlaceholder =
+    placeholder ?? (language === "zh" ? "开始写作..." : "Start writing...");
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
       }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({ placeholder: resolvedPlaceholder }),
       Link.configure({
         openOnClick: true,
         HTMLAttributes: { class: "text-primary underline" },

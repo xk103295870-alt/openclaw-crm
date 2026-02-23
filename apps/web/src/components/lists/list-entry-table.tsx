@@ -13,6 +13,7 @@ import { AttributeCell } from "@/components/records/attribute-cell";
 import { AttributeEditor } from "@/components/records/attribute-editor";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Trash2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ export function ListEntryTable({
   onUpdateEntryValues,
   onRemoveEntry,
 }: ListEntryTableProps) {
+  const { language } = useLanguage();
   const router = useRouter();
   const [editingCell, setEditingCell] = useState<{
     rowId: string;
@@ -78,7 +80,7 @@ export function ListEntryTable({
     // Record name column (always shown)
     const nameCol: ColumnDef<ListEntry> = {
       id: "_record_name",
-      header: "Record",
+      header: language === "zh" ? "记录" : "Record",
       size: 200,
       cell: ({ row }) => (
         <span className="font-medium text-sm">
@@ -90,11 +92,13 @@ export function ListEntryTable({
     // Date added column
     const dateCol: ColumnDef<ListEntry> = {
       id: "_added_at",
-      header: "Added",
+      header: language === "zh" ? "添加时间" : "Added",
       size: 120,
       cell: ({ row }) => (
         <span className="text-xs text-muted-foreground">
-          {new Date(row.original.createdAt).toLocaleDateString()}
+          {new Date(row.original.createdAt).toLocaleDateString(
+            language === "zh" ? "zh-CN" : "en-US"
+          )}
         </span>
       ),
     };
@@ -160,7 +164,7 @@ export function ListEntryTable({
     };
 
     return [openCol, nameCol, ...attrCols, dateCol, removeCol];
-  }, [listAttributes, editingCell, onUpdateEntryValues, onRemoveEntry, router]);
+  }, [language, listAttributes, editingCell, onUpdateEntryValues, onRemoveEntry, router]);
 
   const table = useReactTable({
     data: entries,
@@ -217,7 +221,9 @@ export function ListEntryTable({
                   colSpan={columns.length}
                   className="h-32 text-center text-muted-foreground"
                 >
-                  No entries yet. Add records to this list.
+                  {language === "zh"
+                    ? "暂无条目，请先添加记录。"
+                    : "No entries yet. Add records to this list."}
                 </td>
               </tr>
             )}

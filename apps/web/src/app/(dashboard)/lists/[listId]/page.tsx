@@ -7,8 +7,10 @@ import { ListEntryTable } from "@/components/lists/list-entry-table";
 import { AddEntryModal } from "@/components/lists/add-entry-modal";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw, Trash2, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 export default function ListPage() {
+  const { language } = useLanguage();
   const params = useParams<{ listId: string }>();
   const router = useRouter();
   const listId = params.listId;
@@ -28,7 +30,14 @@ export default function ListPage() {
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Delete list "${list?.name}"? This cannot be undone.`)) return;
+    if (
+      !confirm(
+        language === "zh"
+          ? `确定删除列表“${list?.name}”吗？此操作无法撤销。`
+          : `Delete list "${list?.name}"? This cannot be undone.`
+      )
+    )
+      return;
     setDeleting(true);
     const res = await fetch(`/api/v1/lists/${listId}`, { method: "DELETE" });
     if (res.ok) {
@@ -40,7 +49,7 @@ export default function ListPage() {
   if (loading && !list) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Loading...
+        {language === "zh" ? "加载中..." : "Loading..."}
       </div>
     );
   }
@@ -48,7 +57,7 @@ export default function ListPage() {
   if (!list) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        List not found
+        {language === "zh" ? "列表不存在" : "List not found"}
       </div>
     );
   }
@@ -67,8 +76,12 @@ export default function ListPage() {
           <div>
             <h1 className="text-lg font-semibold">{list.name}</h1>
             <p className="text-xs text-muted-foreground">
-              {list.objectPluralName} list · {total}{" "}
-              {total === 1 ? "entry" : "entries"}
+              {list.objectPluralName} · {total}{" "}
+              {language === "zh"
+                ? "条记录"
+                : total === 1
+                  ? "entry"
+                  : "entries"}
             </p>
           </div>
         </div>
@@ -93,7 +106,7 @@ export default function ListPage() {
           </Button>
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
-            Add {list.objectName}
+            {language === "zh" ? `添加${list.objectName}` : `Add ${list.objectName}`}
           </Button>
         </div>
       </div>

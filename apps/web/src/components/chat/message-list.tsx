@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmationCard } from "./confirmation-card";
 import { Bot, User, Wrench } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface ToolCallPending {
   id: string;
@@ -43,31 +44,25 @@ interface MessageListProps {
   onReject: () => void;
 }
 
-const TOOL_LABELS: Record<string, string> = {
-  search_records: "Searched records",
-  list_objects: "Listed objects",
-  list_records: "Listed records",
-  get_record: "Fetched record",
-  list_tasks: "Listed tasks",
-  get_notes_for_record: "Fetched notes",
-  list_lists: "Listed lists",
-  list_list_entries: "Listed entries",
-  create_record: "Create record",
-  update_record: "Update record",
-  delete_record: "Delete record",
-  create_task: "Create task",
-  create_note: "Create note",
-};
-
-function formatToolResult(content: string | null): { summary: string; detail: string } {
-  if (!content) return { summary: "No result", detail: "No result" };
+function formatToolResult(
+  content: string | null,
+  language: "en" | "zh"
+): { summary: string; detail: string } {
+  if (!content)
+    return {
+      summary: language === "zh" ? "无结果" : "No result",
+      detail: language === "zh" ? "无结果" : "No result",
+    };
   try {
     const parsed = JSON.parse(content);
     // Handle arrays (e.g. list results)
     if (Array.isArray(parsed)) {
       const count = parsed.length;
       return {
-        summary: `${count} result${count !== 1 ? "s" : ""} returned`,
+        summary:
+          language === "zh"
+            ? `返回 ${count} 条结果`
+            : `${count} result${count !== 1 ? "s" : ""} returned`,
         detail: JSON.stringify(parsed, null, 2),
       };
     }
@@ -75,20 +70,32 @@ function formatToolResult(content: string | null): { summary: string; detail: st
     if (parsed.data && Array.isArray(parsed.data)) {
       const count = parsed.data.length;
       return {
-        summary: `${count} result${count !== 1 ? "s" : ""} returned`,
+        summary:
+          language === "zh"
+            ? `返回 ${count} 条结果`
+            : `${count} result${count !== 1 ? "s" : ""} returned`,
         detail: JSON.stringify(parsed, null, 2),
       };
     }
     // Handle error objects
     if (parsed.error) {
-      return { summary: `Error: ${parsed.error}`, detail: JSON.stringify(parsed, null, 2) };
+      return {
+        summary:
+          language === "zh"
+            ? `错误：${parsed.error}`
+            : `Error: ${parsed.error}`,
+        detail: JSON.stringify(parsed, null, 2),
+      };
     }
     // Handle single record result
     if (parsed.id) {
       const name = parsed.displayName || parsed.name || parsed.content || parsed.id;
       return { summary: String(name), detail: JSON.stringify(parsed, null, 2) };
     }
-    return { summary: "Result returned", detail: JSON.stringify(parsed, null, 2) };
+    return {
+      summary: language === "zh" ? "已返回结果" : "Result returned",
+      detail: JSON.stringify(parsed, null, 2),
+    };
   } catch {
     // Plain text result
     const trimmed = content.length > 80 ? content.slice(0, 80) + "..." : content;
@@ -105,6 +112,39 @@ export function MessageList({
   onApprove,
   onReject,
 }: MessageListProps) {
+  const { language } = useLanguage();
+  const TOOL_LABELS: Record<string, string> =
+    language === "zh"
+      ? {
+          search_records: "已搜索记录",
+          list_objects: "已列出对象",
+          list_records: "已列出记录",
+          get_record: "已获取记录",
+          list_tasks: "已列出任务",
+          get_notes_for_record: "已获取笔记",
+          list_lists: "已列出列表",
+          list_list_entries: "已列出条目",
+          create_record: "创建记录",
+          update_record: "更新记录",
+          delete_record: "删除记录",
+          create_task: "创建任务",
+          create_note: "创建笔记",
+        }
+      : {
+          search_records: "Searched records",
+          list_objects: "Listed objects",
+          list_records: "Listed records",
+          get_record: "Fetched record",
+          list_tasks: "Listed tasks",
+          get_notes_for_record: "Fetched notes",
+          list_lists: "Listed lists",
+          list_list_entries: "Listed entries",
+          create_record: "Create record",
+          update_record: "Update record",
+          delete_record: "Delete record",
+          create_task: "Create task",
+          create_note: "Create note",
+        };
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -117,8 +157,14 @@ export function MessageList({
         {messages.length === 0 && !streamingContent && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Bot className="h-12 w-12 mb-4 opacity-30" />
-            <p className="text-lg font-medium">How can I help you?</p>
-            <p className="text-sm mt-1">Ask me anything about your CRM data</p>
+            <p className="text-lg font-medium">
+              {language === "zh" ? "我可以如何帮你？" : "How can I help you?"}
+            </p>
+            <p className="text-sm mt-1">
+              {language === "zh"
+                ? "你可以询问任何 CRM 数据问题"
+                : "Ask me anything about your CRM data"}
+            </p>
           </div>
         )}
 
@@ -129,7 +175,7 @@ export function MessageList({
           // Tool results - render as collapsible result
           if (msg.role === "tool") {
             const label = TOOL_LABELS[msg.toolName || ""] || msg.toolName || "Tool";
-            const resultContent = formatToolResult(msg.content);
+            const resultContent = formatToolResult(msg.content, language);
             return (
               <div key={msg.id} className="pl-10 space-y-1">
                 <details className="group">

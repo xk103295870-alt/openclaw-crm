@@ -2,9 +2,10 @@
 
 import type { FilterCondition, FilterGroup } from "@openclaw-crm/shared";
 import type { AttributeType } from "@openclaw-crm/shared";
-import { OPERATOR_LABELS } from "@/lib/filter-utils";
+import { getOperatorLabel } from "@/lib/filter-utils";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeDef {
   id: string;
@@ -28,6 +29,8 @@ export function FilterBar({
   onRemoveCondition,
   onClearAll,
 }: FilterBarProps) {
+  const { language } = useLanguage();
+
   if (!filter.conditions || filter.conditions.length === 0) return null;
 
   return (
@@ -38,7 +41,7 @@ export function FilterBar({
         const attr = attributes.find((a) => a.slug === condition.attribute);
         if (!attr) return null;
 
-        const displayValue = formatFilterValue(condition, attr);
+        const displayValue = formatFilterValue(condition, attr, language);
 
         return (
           <Badge
@@ -52,10 +55,8 @@ export function FilterBar({
               </span>
             )}
             <span className="text-muted-foreground">{attr.title}</span>
-            <span>{OPERATOR_LABELS[condition.operator]}</span>
-            {displayValue && (
-              <span className="font-medium">{displayValue}</span>
-            )}
+            <span>{getOperatorLabel(condition.operator, language)}</span>
+            {displayValue && <span className="font-medium">{displayValue}</span>}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -74,7 +75,7 @@ export function FilterBar({
           onClick={onClearAll}
           className="text-xs text-muted-foreground hover:text-foreground ml-1"
         >
-          Clear all
+          {language === "zh" ? "清除全部" : "Clear all"}
         </button>
       )}
     </div>
@@ -83,7 +84,8 @@ export function FilterBar({
 
 function formatFilterValue(
   condition: FilterCondition,
-  attr: AttributeDef
+  attr: AttributeDef,
+  language: "en" | "zh"
 ): string {
   if (
     condition.operator === "is_empty" ||
@@ -107,7 +109,13 @@ function formatFilterValue(
   }
 
   if (attr.type === "checkbox") {
-    return value === true ? "Yes" : "No";
+    return value === true
+      ? language === "zh"
+        ? "是"
+        : "Yes"
+      : language === "zh"
+        ? "否"
+        : "No";
   }
 
   if (Array.isArray(value)) {

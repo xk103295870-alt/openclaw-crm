@@ -14,6 +14,7 @@ import { AttributeEditor } from "./attribute-editor";
 import { cn } from "@/lib/utils";
 import { Plus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ export function RecordTable({
   onCreateRecord,
   objectSlug,
 }: RecordTableProps) {
+  const { language } = useLanguage();
   const router = useRouter();
   const [editingCell, setEditingCell] = useState<{ rowId: string; colId: string } | null>(null);
 
@@ -166,7 +168,9 @@ export function RecordTable({
                   colSpan={attributes.length}
                   className="h-32 text-center text-muted-foreground"
                 >
-                  No records yet. Click the button below to create one.
+                  {language === "zh"
+                    ? "暂无记录，点击下方按钮创建。"
+                    : "No records yet. Click the button below to create one."}
                 </td>
               </tr>
             )}
@@ -183,7 +187,7 @@ export function RecordTable({
           className="text-muted-foreground hover:text-foreground"
         >
           <Plus className="mr-1 h-4 w-4" />
-          New record
+          {language === "zh" ? "新建记录" : "New record"}
         </Button>
       </div>
     </div>

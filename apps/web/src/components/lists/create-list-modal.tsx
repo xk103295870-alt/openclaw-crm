@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/language-provider";
 
 interface ObjectOption {
   slug: string;
@@ -22,6 +23,7 @@ export function CreateListModal({
   onClose,
   onSubmit,
 }: CreateListModalProps) {
+  const { language } = useLanguage();
   const [name, setName] = useState("");
   const [objectSlug, setObjectSlug] = useState("");
   const [objects, setObjects] = useState<ObjectOption[]>([]);
@@ -55,21 +57,29 @@ export function CreateListModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg">
-        <h2 className="text-sm font-semibold mb-4">Create List</h2>
+        <h2 className="text-sm font-semibold mb-4">
+          {language === "zh" ? "创建列表" : "Create List"}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label className="text-xs">Name</Label>
+            <Label className="text-xs">{language === "zh" ? "名称" : "Name"}</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Hot Leads, Enterprise Prospects"
+              placeholder={
+                language === "zh"
+                  ? "例如：高意向线索、企业潜客"
+                  : "e.g. Hot Leads, Enterprise Prospects"
+              }
               className="mt-1"
               autoFocus
             />
           </div>
 
           <div>
-            <Label className="text-xs">Object Type</Label>
+            <Label className="text-xs">
+              {language === "zh" ? "对象类型" : "Object Type"}
+            </Label>
             <select
               value={objectSlug}
               onChange={(e) => setObjectSlug(e.target.value)}
@@ -85,10 +95,10 @@ export function CreateListModal({
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-              Cancel
+              {language === "zh" ? "取消" : "Cancel"}
             </Button>
             <Button type="submit" size="sm" disabled={!name.trim()}>
-              Create
+              {language === "zh" ? "创建" : "Create"}
             </Button>
           </div>
         </form>

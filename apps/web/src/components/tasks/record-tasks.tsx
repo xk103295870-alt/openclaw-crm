@@ -6,6 +6,7 @@ import { Plus, Check, Circle, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskDialog } from "./task-dialog";
 import { isToday, isTomorrow, differenceInDays, format } from "date-fns";
+import { useLanguage } from "@/components/language-provider";
 
 interface Task {
   id: string;
@@ -24,15 +25,18 @@ interface RecordTasksProps {
   recordDisplayName?: string;
 }
 
-function getRelativeDate(deadline: string): {
+function getRelativeDate(deadline: string, language: "en" | "zh"): {
   label: string;
   color: string;
 } {
   const d = new Date(deadline);
-  if (isToday(d)) return { label: "Today", color: "text-orange-400" };
-  if (isTomorrow(d)) return { label: "Tomorrow", color: "text-orange-400" };
+  if (isToday(d))
+    return { label: language === "zh" ? "今天" : "Today", color: "text-orange-400" };
+  if (isTomorrow(d))
+    return { label: language === "zh" ? "明天" : "Tomorrow", color: "text-orange-400" };
   const days = differenceInDays(d, new Date());
-  if (days < 0) return { label: "Overdue", color: "text-destructive" };
+  if (days < 0)
+    return { label: language === "zh" ? "逾期" : "Overdue", color: "text-destructive" };
   if (days <= 7) return { label: format(d, "EEEE"), color: "text-muted-foreground" };
   return { label: format(d, "MMM d"), color: "text-muted-foreground" };
 }
@@ -42,6 +46,7 @@ export function RecordTasks({
   recordId,
   recordDisplayName,
 }: RecordTasksProps) {
+  const { language } = useLanguage();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
@@ -116,14 +121,14 @@ export function RecordTasks({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to create task");
+      if (!res.ok) throw new Error(language === "zh" ? "创建任务失败" : "Failed to create task");
     } else if (editingTask) {
       const res = await fetch(`/api/v1/tasks/${editingTask.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to update task");
+      if (!res.ok) throw new Error(language === "zh" ? "更新任务失败" : "Failed to update task");
     }
     fetchTasks();
   }
@@ -140,7 +145,7 @@ export function RecordTasks({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Tasks</h3>
+        <h3 className="text-sm font-medium">{language === "zh" ? "任务" : "Tasks"}</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -148,26 +153,26 @@ export function RecordTasks({
           className="text-xs"
         >
           <Plus className="mr-1 h-3.5 w-3.5" />
-          Add task
+          {language === "zh" ? "添加任务" : "Add task"}
         </Button>
       </div>
 
       {loading && tasks.length === 0 && (
         <p className="text-xs text-muted-foreground py-4 text-center">
-          Loading...
+          {language === "zh" ? "加载中..." : "Loading..."}
         </p>
       )}
 
       {!loading && tasks.length === 0 && (
         <p className="text-xs text-muted-foreground py-4 text-center">
-          No tasks yet
+          {language === "zh" ? "暂无任务" : "No tasks yet"}
         </p>
       )}
 
       <div className="space-y-1">
         {openTasks.map((task) => {
           const dateInfo = task.deadline
-            ? getRelativeDate(task.deadline)
+            ? getRelativeDate(task.deadline, language)
             : null;
           return (
             <div
@@ -204,7 +209,9 @@ export function RecordTasks({
       {completedTasks.length > 0 && (
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground pt-2">
-            Completed ({completedTasks.length})
+            {language === "zh"
+              ? `已完成（${completedTasks.length}）`
+              : `Completed (${completedTasks.length})`}
           </p>
           {completedTasks.map((task) => (
             <div

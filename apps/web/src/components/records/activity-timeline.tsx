@@ -1,6 +1,7 @@
 "use client";
 
 import { StickyNote, CheckSquare, UserPlus, Clock } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface ActivityItem {
   id: string;
@@ -16,10 +17,12 @@ interface ActivityTimelineProps {
 }
 
 export function ActivityTimeline({ activities }: ActivityTimelineProps) {
+  const { language } = useLanguage();
+
   if (activities.length === 0) {
     return (
       <div className="px-3 py-4 text-sm text-muted-foreground">
-        No activity yet.
+        {language === "zh" ? "暂无活动。" : "No activity yet."}
       </div>
     );
   }
@@ -42,7 +45,7 @@ export function ActivityTimeline({ activities }: ActivityTimelineProps) {
               </p>
             )}
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {formatRelativeTime(activity.createdAt)}
+              {formatRelativeTime(activity.createdAt, language)}
             </p>
           </div>
         </div>
@@ -64,7 +67,7 @@ function ActivityIcon({ type }: { type: ActivityItem["type"] }) {
   }
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, language: "en" | "zh"): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
@@ -72,9 +75,17 @@ function formatRelativeTime(dateStr: string): string {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
+  if (language === "zh") {
+    if (minutes < 1) return "刚刚";
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+    return date.toLocaleDateString("zh-CN");
+  }
+
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString("en-US");
 }

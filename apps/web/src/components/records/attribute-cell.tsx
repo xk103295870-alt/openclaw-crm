@@ -4,6 +4,7 @@ import type { AttributeType } from "@openclaw-crm/shared";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Star, ExternalLink } from "lucide-react";
 import { extractPersonalName } from "@/lib/display-name";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeCellProps {
   type: AttributeType;
@@ -13,6 +14,9 @@ interface AttributeCellProps {
 }
 
 export function AttributeCell({ type, value, options, statuses }: AttributeCellProps) {
+  const { language } = useLanguage();
+  const locale = language === "zh" ? "zh-CN" : "en-US";
+
   if (value === null || value === undefined) {
     return <span className="text-muted-foreground/50">—</span>;
   }
@@ -53,7 +57,7 @@ export function AttributeCell({ type, value, options, statuses }: AttributeCellP
           </span>
         );
       }
-      return <span>{num.toLocaleString()}</span>;
+      return <span>{num.toLocaleString(locale)}</span>;
     }
 
     case "currency": {
@@ -61,7 +65,7 @@ export function AttributeCell({ type, value, options, statuses }: AttributeCellP
       if (!cv?.amount && cv?.amount !== 0) return <span className="text-muted-foreground/50">—</span>;
       return (
         <span>
-          {new Intl.NumberFormat("en-US", {
+          {new Intl.NumberFormat(locale, {
             style: "currency",
             currency: cv.currencyCode || "USD",
           }).format(cv.amount)}
@@ -70,10 +74,10 @@ export function AttributeCell({ type, value, options, statuses }: AttributeCellP
     }
 
     case "date":
-      return <span>{new Date(value as string).toLocaleDateString()}</span>;
+      return <span>{new Date(value as string).toLocaleDateString(locale)}</span>;
 
     case "timestamp":
-      return <span>{new Date(value as string).toLocaleString()}</span>;
+      return <span>{new Date(value as string).toLocaleString(locale)}</span>;
 
     case "checkbox":
       return value ? (
@@ -133,7 +137,7 @@ export function AttributeCell({ type, value, options, statuses }: AttributeCellP
           <span className="flex flex-wrap gap-1">
             {refs.map((ref, i) => (
               <Badge key={i} variant="secondary" className="text-xs font-normal">
-                {ref.displayName || "Unnamed"}
+                {ref.displayName || (language === "zh" ? "未命名" : "Unnamed")}
               </Badge>
             ))}
           </span>
@@ -151,7 +155,11 @@ export function AttributeCell({ type, value, options, statuses }: AttributeCellP
       return <span>{String(value)}</span>;
 
     case "interaction":
-      return <span className="text-muted-foreground">Interaction</span>;
+      return (
+        <span className="text-muted-foreground">
+          {language === "zh" ? "互动" : "Interaction"}
+        </span>
+      );
 
     default:
       return <span>{String(value)}</span>;

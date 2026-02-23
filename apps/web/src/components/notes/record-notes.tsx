@@ -5,7 +5,7 @@ import { NoteEditor } from "./note-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 interface Note {
   id: string;
@@ -21,6 +21,7 @@ interface RecordNotesProps {
 }
 
 export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
+  const { language } = useLanguage();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -89,7 +90,7 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Notes</h3>
+        <h3 className="text-sm font-medium">{language === "zh" ? "笔记" : "Notes"}</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -97,7 +98,7 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
           className="text-xs"
         >
           <Plus className="mr-1 h-3.5 w-3.5" />
-          Add note
+          {language === "zh" ? "添加笔记" : "Add note"}
         </Button>
       </div>
 
@@ -107,13 +108,13 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
           <Input
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Note title"
+            placeholder={language === "zh" ? "笔记标题" : "Note title"}
             className="h-8 text-sm"
           />
           <NoteEditor
             content={newContent}
             onChange={setNewContent}
-            placeholder="Write your note..."
+            placeholder={language === "zh" ? "写下你的笔记..." : "Write your note..."}
           />
           <div className="flex justify-end gap-2">
             <Button
@@ -121,10 +122,10 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
               size="sm"
               onClick={() => setCreating(false)}
             >
-              Cancel
+              {language === "zh" ? "取消" : "Cancel"}
             </Button>
             <Button size="sm" onClick={handleCreate}>
-              Save
+              {language === "zh" ? "保存" : "Save"}
             </Button>
           </div>
         </div>
@@ -133,13 +134,13 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
       {/* Notes list */}
       {loading && notes.length === 0 && (
         <p className="text-xs text-muted-foreground py-4 text-center">
-          Loading...
+          {language === "zh" ? "加载中..." : "Loading..."}
         </p>
       )}
 
       {!loading && notes.length === 0 && !creating && (
         <p className="text-xs text-muted-foreground py-4 text-center">
-          No notes yet
+          {language === "zh" ? "暂无笔记" : "No notes yet"}
         </p>
       )}
 
@@ -162,10 +163,12 @@ export function RecordNotes({ objectSlug, recordId }: RecordNotesProps) {
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                 )}
                 <span className="text-sm font-medium flex-1 truncate">
-                  {note.title || "Untitled"}
+                  {note.title || (language === "zh" ? "未命名" : "Untitled")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(note.updatedAt).toLocaleDateString()}
+                  {new Date(note.updatedAt).toLocaleDateString(
+                    language === "zh" ? "zh-CN" : "en-US"
+                  )}
                 </span>
                 <button
                   onClick={(e) => {

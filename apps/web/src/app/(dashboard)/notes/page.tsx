@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { ChooseRecordDialog } from "@/components/records/choose-record-dialog";
 import { NoteEditorPanel } from "@/components/notes/note-editor-panel";
 import { isToday, isYesterday, isThisWeek, format } from "date-fns";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -42,13 +43,6 @@ function getDateGroup(dateStr: string): DateGroup {
   return "older";
 }
 
-const GROUP_LABELS: Record<DateGroup, string> = {
-  today: "Created today",
-  yesterday: "Yesterday",
-  this_week: "This week",
-  older: "Older",
-};
-
 const GROUP_ORDER: DateGroup[] = ["today", "yesterday", "this_week", "older"];
 
 const OBJECT_COLORS: Record<string, string> = {
@@ -57,8 +51,8 @@ const OBJECT_COLORS: Record<string, string> = {
   deals: "bg-orange-500",
 };
 
-function getContentPreview(content: unknown): string {
-  if (!content) return "This note has no content.";
+function getContentPreview(content: unknown, language: "en" | "zh"): string {
+  if (!content) return language === "zh" ? "这条笔记暂无内容。" : "This note has no content.";
   try {
     const doc = content as { content?: Array<{ content?: Array<{ text?: string }> }> };
     if (doc.content) {
@@ -75,19 +69,20 @@ function getContentPreview(content: unknown): string {
   } catch {
     // ignore
   }
-  return "This note has no content.";
+  return language === "zh" ? "这条笔记暂无内容。" : "This note has no content.";
 }
 
-function getRelativeDate(dateStr: string): string {
+function getRelativeDate(dateStr: string, language: "en" | "zh"): string {
   const d = new Date(dateStr);
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
+  if (isToday(d)) return language === "zh" ? "今天" : "Today";
+  if (isYesterday(d)) return language === "zh" ? "昨天" : "Yesterday";
   return format(d, "MMM d");
 }
 
 // ─── Main Component ─────────────────────────────────────────────────
 
 export default function NotesPage() {
+  const { language } = useLanguage();
   const [notes, setNotes] = useState<Note[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -167,25 +162,39 @@ export default function NotesPage() {
   }
 
   const visibleGroups = GROUP_ORDER.filter((key) => groups.has(key));
+  const GROUP_LABELS: Record<DateGroup, string> =
+    language === "zh"
+      ? {
+          today: "今天创建",
+          yesterday: "昨天",
+          this_week: "本周",
+          older: "更早",
+        }
+      : {
+          today: "Created today",
+          yesterday: "Yesterday",
+          this_week: "This week",
+          older: "Older",
+        };
 
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold">Notes</h1>
+          <h1 className="text-lg font-semibold">{language === "zh" ? "笔记" : "Notes"}</h1>
           <span className="text-sm text-muted-foreground">{total}</span>
         </div>
         <div className="flex items-center gap-2">
           {/* Sort pill */}
           <div className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground">
             <ArrowUpDown className="h-3 w-3" />
-            <span>Creation date</span>
+            <span>{language === "zh" ? "创建时间" : "Creation date"}</span>
           </div>
 
           <Button size="sm" onClick={handleNewNote}>
             <Plus className="mr-1 h-4 w-4" />
-            New note
+            {language === "zh" ? "新建笔记" : "New note"}
           </Button>
         </div>
       </div>
@@ -195,28 +204,36 @@ export default function NotesPage() {
         {/* Favorites section */}
         <div className="px-4 pt-4 pb-2">
           <h2 className="text-xs font-medium text-muted-foreground mb-3">
-            Favorites
+            {language === "zh" ? "收藏" : "Favorites"}
           </h2>
           <div className="rounded-lg border-2 border-dashed border-border/50 py-8 text-center">
             <Star className="h-6 w-6 text-muted-foreground/20 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Favorites</p>
+            <p className="text-sm text-muted-foreground">
+              {language === "zh" ? "收藏" : "Favorites"}
+            </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              Notes that you favorite will appear here
+              {language === "zh"
+                ? "你收藏的笔记会显示在这里"
+                : "Notes that you favorite will appear here"}
             </p>
           </div>
         </div>
 
         {/* Loading / Empty states */}
         {loading && notes.length === 0 && (
-          <p className="text-muted-foreground text-center py-12">Loading...</p>
+          <p className="text-muted-foreground text-center py-12">
+            {language === "zh" ? "加载中..." : "Loading..."}
+          </p>
         )}
 
         {!loading && notes.length === 0 && (
           <div className="text-center py-12">
             <StickyNote className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">No notes yet.</p>
+            <p className="text-muted-foreground">{language === "zh" ? "还没有笔记。" : "No notes yet."}</p>
             <p className="text-sm text-muted-foreground/60 mt-1">
-              Click &quot;+ New note&quot; to create your first note.
+              {language === "zh"
+                ? "点击“+ 新建笔记”创建第一条笔记。"
+                : "Click \"+ New note\" to create your first note."}
             </p>
           </div>
         )}
@@ -297,7 +314,8 @@ function NoteCard({
 }) {
   const objectColor =
     OBJECT_COLORS[note.objectSlug || ""] || "bg-muted-foreground";
-  const preview = getContentPreview(note.content);
+  const { language } = useLanguage();
+  const preview = getContentPreview(note.content, language);
 
   return (
     <div
@@ -317,13 +335,13 @@ function NoteCard({
               <Building2 className="h-2 w-2 text-white" />
             </div>
             <span className="text-xs font-medium text-muted-foreground truncate">
-              {note.recordDisplayName || "Unknown"}
+              {note.recordDisplayName || (language === "zh" ? "未知" : "Unknown")}
             </span>
           </div>
 
           {/* Title */}
           <h3 className="text-sm font-medium truncate">
-            {note.title || "Untitled"}
+            {note.title || (language === "zh" ? "未命名" : "Untitled")}
           </h3>
 
           {/* Preview */}
@@ -334,7 +352,7 @@ function NoteCard({
 
         {/* Date */}
         <span className="text-xs text-muted-foreground shrink-0 mt-5">
-          {getRelativeDate(note.createdAt)}
+          {getRelativeDate(note.createdAt, language)}
         </span>
       </div>
     </div>

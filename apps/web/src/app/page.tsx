@@ -14,9 +14,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { RotatingChat } from "@/components/landing/rotating-chat";
 import { TerminalDemo } from "@/components/landing/terminal-demo";
 import { LandingNav } from "@/components/landing/landing-nav";
+import { LandingLanguageToggle } from "@/components/landing/landing-language-toggle";
 import { JsonLd } from "@/components/json-ld";
 import { TrackedLink, TrackedAnchor } from "@/components/analytics/tracked-link";
 import type { Metadata } from "next";
+import { getRequestLanguage } from "@/lib/i18n-server";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_APP_URL || "https://openclaw-crm.402box.io";
@@ -27,31 +29,35 @@ export const metadata: Metadata = {
   },
 };
 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "OpenClaw CRM",
-  url: "https://openclaw-crm.402box.io",
-  logo: "https://openclaw-crm.402box.io/favicon.ico",
-  sameAs: ["https://github.com/giorgosn/openclaw-crm", "https://x.com/402BoxIO"],
-};
+export default async function LandingPage() {
+  const language = await getRequestLanguage();
+  const isZh = language === "zh";
 
-const softwareSchema = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "OpenClaw CRM",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Linux, macOS, Windows",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
-  description:
-    "The CRM your AI agent already knows how to use. Open-source, self-hosted, with native OpenClaw Bot integration.",
-};
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "OpenClaw CRM",
+    url: "https://openclaw-crm.402box.io",
+    logo: "https://openclaw-crm.402box.io/favicon.ico",
+    sameAs: ["https://github.com/giorgosn/openclaw-crm", "https://x.com/402BoxIO"],
+  };
 
-export default function LandingPage() {
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "OpenClaw CRM",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Linux, macOS, Windows",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    description: isZh
+      ? "你的 AI 代理天生会用的 CRM。开源、自托管，并原生集成 OpenClaw Bot。"
+      : "The CRM your AI agent already knows how to use. Open-source, self-hosted, with native OpenClaw Bot integration.",
+  };
+
   return (
     <div className="relative bg-background text-foreground">
       <JsonLd data={organizationSchema} />
@@ -96,6 +102,7 @@ export default function LandingPage() {
               >
                 <XIcon className="h-[16px] w-[16px]" />
               </TrackedAnchor>
+              <LandingLanguageToggle />
               <ThemeToggle className="rounded-full p-2 !text-muted-foreground/50 transition-all hover:!text-foreground hover:bg-foreground/[0.05]" />
             </div>
             {/* Action group */}
@@ -104,14 +111,14 @@ export default function LandingPage() {
                 href="/login"
                 className="hidden sm:inline-flex rounded-full px-4 py-1.5 text-[13px] text-muted-foreground transition-all hover:text-foreground hover:bg-foreground/[0.04]"
               >
-                Log in
+                {isZh ? "登录" : "Log in"}
               </Link>
               <TrackedLink
                 href="/register"
                 className="rounded-full border border-foreground/12 px-3.5 sm:px-4 py-1.5 text-[13px] font-medium text-foreground transition-all hover:border-foreground/25 hover:bg-foreground/[0.03]"
                 eventProps={{ button_text: "Get started", location: "nav", destination: "register" }}
               >
-                Get started
+                {isZh ? "开始使用" : "Get started"}
               </TrackedLink>
             </div>
           </div>
@@ -127,12 +134,15 @@ export default function LandingPage() {
           </h1>
 
           <p className="landing-fade-up mt-6 text-2xl font-normal tracking-[-0.02em] leading-snug text-muted-foreground sm:text-3xl lg:text-[2.25rem]">
-            The CRM your AI agent
-            <br className="hidden sm:block" /> already knows how to use.
+            {isZh ? "你的 AI 代理天生会用的 CRM" : "The CRM your AI agent"}
+            <br className="hidden sm:block" />{" "}
+            {isZh ? "开箱即用。 " : "already knows how to use."}
           </p>
 
           <p className="landing-fade-up-1 mt-6 text-[15px] leading-relaxed text-muted-foreground/70">
-            Open-source. Self-hosted. Connect your OpenClaw Bot in 2 minutes.
+            {isZh
+              ? "开源。自托管。2 分钟连接你的 OpenClaw Bot。"
+              : "Open-source. Self-hosted. Connect your OpenClaw Bot in 2 minutes."}
           </p>
 
           <div className="landing-fade-up-2 mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -141,7 +151,7 @@ export default function LandingPage() {
               className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-[13px] font-medium text-background shadow-[0_1px_4px_rgba(0,0,0,0.1),0_0px_1px_rgba(0,0,0,0.06)] transition-all hover:opacity-80 hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
               eventProps={{ button_text: "Get started", location: "hero", destination: "register" }}
             >
-              Get started
+              {isZh ? "开始使用" : "Get started"}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </TrackedLink>
             <TrackedAnchor
@@ -152,7 +162,7 @@ export default function LandingPage() {
               eventProps={{ url: "https://github.com/giorgosn/openclaw-crm", link_text: "View on GitHub" }}
             >
               <GitHubLogoIcon className="h-3.5 w-3.5" />
-              View on GitHub
+              {isZh ? "在 GitHub 查看" : "View on GitHub"}
             </TrackedAnchor>
           </div>
         </div>
@@ -166,12 +176,12 @@ export default function LandingPage() {
               {/* Terminal title bar */}
               <div className="flex items-center border-b border-white/[0.05] bg-[#111113] px-6 py-3">
                 <span className="text-[12px] font-medium text-white/40">
-                  OpenClaw Bot
+                  {isZh ? "OpenClaw 助手" : "OpenClaw Bot"}
                 </span>
               </div>
               {/* Terminal body */}
               <div className="bg-[#0c0c0e] px-5 py-8 sm:px-14 sm:py-14 min-h-[240px] sm:min-h-[320px] flex flex-col justify-center">
-                <TerminalDemo />
+                <TerminalDemo language={language} />
               </div>
             </div>
           </div>
@@ -182,18 +192,19 @@ export default function LandingPage() {
       <section className="relative mx-auto max-w-5xl px-6 pb-28 sm:pb-40">
         <ScrollReveal>
           <p className="mb-10 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
-            Why OpenClaw
+            {isZh ? "为什么选择 OPENCLAW" : "Why OpenClaw"}
           </p>
         </ScrollReveal>
         <div className="grid gap-5 sm:grid-cols-3 sm:gap-5">
           <ScrollReveal delay={0} className="h-full">
             <div className="h-full rounded-2xl border border-foreground/[0.06] dark:border-white/[0.06] bg-foreground/[0.015] dark:bg-white/[0.02] px-7 py-7 transition-[border-color,background-color,box-shadow,transform] duration-150 hover:border-foreground/20 dark:hover:border-white/15 hover:bg-foreground/[0.025] dark:hover:bg-white/[0.035] hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_24px_-6px_rgba(0,0,0,0.4)] hover:-translate-y-0.5">
               <h3 className="text-[15px] font-medium tracking-[-0.01em]">
-                Your agent runs your CRM
+                {isZh ? "让你的代理直接操作 CRM" : "Your agent runs your CRM"}
               </h3>
               <p className="mt-2 text-[14px] leading-[1.65] text-muted-foreground">
-                Connect your OpenClaw Bot in 2 minutes. Manage contacts, deals,
-                tasks from wherever you already talk to your agent.
+                {isZh
+                  ? "2 分钟连接 OpenClaw Bot。你在任何与代理对话的地方，都能管理联系人、商机和任务。"
+                  : "Connect your OpenClaw Bot in 2 minutes. Manage contacts, deals, tasks from wherever you already talk to your agent."}
               </p>
             </div>
           </ScrollReveal>
@@ -201,11 +212,12 @@ export default function LandingPage() {
           <ScrollReveal delay={0.1} className="h-full">
             <div className="h-full rounded-2xl border border-foreground/[0.06] dark:border-white/[0.06] bg-foreground/[0.015] dark:bg-white/[0.02] px-7 py-7 transition-[border-color,background-color,box-shadow,transform] duration-150 hover:border-foreground/20 dark:hover:border-white/15 hover:bg-foreground/[0.025] dark:hover:bg-white/[0.035] hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_24px_-6px_rgba(0,0,0,0.4)] hover:-translate-y-0.5">
               <h3 className="text-[15px] font-medium tracking-[-0.01em]">
-                Built-in AI assistant
+                {isZh ? "内置 AI 助手" : "Built-in AI assistant"}
               </h3>
               <p className="mt-2 text-[14px] leading-[1.65] text-muted-foreground">
-                When you're inside the CRM, an AI chat agent analyzes your data,
-                looks things up, and takes actions.
+                {isZh
+                  ? "在 CRM 内，AI 对话助手会分析你的数据、检索信息并执行操作。"
+                  : "When you're inside the CRM, an AI chat agent analyzes your data, looks things up, and takes actions."}
               </p>
             </div>
           </ScrollReveal>
@@ -213,11 +225,12 @@ export default function LandingPage() {
           <ScrollReveal delay={0.2} className="h-full">
             <div className="h-full rounded-2xl border border-foreground/[0.06] dark:border-white/[0.06] bg-foreground/[0.015] dark:bg-white/[0.02] px-7 py-7 transition-[border-color,background-color,box-shadow,transform] duration-150 hover:border-foreground/20 dark:hover:border-white/15 hover:bg-foreground/[0.025] dark:hover:bg-white/[0.035] hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_24px_-6px_rgba(0,0,0,0.4)] hover:-translate-y-0.5">
               <h3 className="text-[15px] font-medium tracking-[-0.01em]">
-                Open-source, self-hosted
+                {isZh ? "开源，自托管" : "Open-source, self-hosted"}
               </h3>
               <p className="mt-2 text-[14px] leading-[1.65] text-muted-foreground">
-                MIT licensed. Your data stays on your server. Deploy with Docker
-                Compose.
+                {isZh
+                  ? "MIT 许可。数据留在你自己的服务器上。支持 Docker Compose 部署。"
+                  : "MIT licensed. Your data stays on your server. Deploy with Docker Compose."}
               </p>
             </div>
           </ScrollReveal>
@@ -228,7 +241,7 @@ export default function LandingPage() {
       <section className="relative mx-auto max-w-5xl px-6 pb-28 sm:pb-40">
         <ScrollReveal>
           <p className="mb-10 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
-            AI inside the CRM
+            {isZh ? "CRM 内置 AI" : "AI inside the CRM"}
           </p>
         </ScrollReveal>
         <ScrollReveal>
@@ -242,18 +255,18 @@ export default function LandingPage() {
                   <div className="h-3 w-3 rounded-full bg-foreground/10 dark:bg-white/[0.08]" />
                 </div>
                 <span className="ml-3 text-[12px] font-medium text-muted-foreground/50">
-                  AI Chat
+                  {isZh ? "AI 对话" : "AI Chat"}
                 </span>
               </div>
               {/* Chat area */}
               <div className="bg-background dark:bg-[#0c0c0e] px-5 py-8 sm:px-14 sm:py-14 min-h-[200px] sm:min-h-[280px] flex flex-col justify-center">
-                <RotatingChat />
+                <RotatingChat language={language} />
               </div>
               {/* Input bar */}
               <div className="border-t border-foreground/8 dark:border-white/[0.06] bg-card/50 dark:bg-white/[0.02] px-6 py-4">
                 <div className="flex items-center gap-3 rounded-xl bg-background/60 dark:bg-white/[0.04] border border-foreground/8 dark:border-white/[0.06] px-5 py-3">
                   <span className="text-[13px] text-muted-foreground/40">
-                    Ask your CRM anything...
+                    {isZh ? "向你的 CRM 提问..." : "Ask your CRM anything..."}
                   </span>
                 </div>
               </div>
@@ -267,7 +280,7 @@ export default function LandingPage() {
         <ScrollReveal>
           <div className="text-center">
             <p className="text-[15px] text-muted-foreground">
-              Connect your agent. Get started.
+              {isZh ? "连接你的代理，立即开始。" : "Connect your agent. Get started."}
             </p>
             <div className="mt-5">
               <TrackedLink
@@ -275,7 +288,7 @@ export default function LandingPage() {
                 className="group inline-flex items-center gap-2 rounded-full border border-foreground/15 dark:border-white/12 px-6 py-2.5 text-[14px] font-medium text-foreground transition-[border-color,background-color] duration-150 hover:border-foreground/30 dark:hover:border-white/20 hover:bg-foreground/[0.03] dark:hover:bg-white/[0.04]"
                 eventProps={{ button_text: "Get started", location: "footer_cta", destination: "register" }}
               >
-                Get started
+                {isZh ? "开始使用" : "Get started"}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </TrackedLink>
             </div>
@@ -294,19 +307,19 @@ export default function LandingPage() {
               href="/docs"
               className="text-[12px] text-muted-foreground/60 transition-colors hover:text-muted-foreground"
             >
-              Docs
+              {isZh ? "文档" : "Docs"}
             </Link>
             <Link
               href="/blog"
               className="text-[12px] text-muted-foreground/60 transition-colors hover:text-muted-foreground"
             >
-              Blog
+              {isZh ? "博客" : "Blog"}
             </Link>
             <Link
               href="/compare"
               className="text-[12px] text-muted-foreground/60 transition-colors hover:text-muted-foreground"
             >
-              Compare
+              {isZh ? "对比" : "Compare"}
             </Link>
             <TrackedAnchor
               href="https://github.com/giorgosn/openclaw-crm"
@@ -327,7 +340,7 @@ export default function LandingPage() {
               X
             </TrackedAnchor>
             <span className="text-[12px] text-muted-foreground/60">
-              MIT License
+              {isZh ? "MIT 许可" : "MIT License"}
             </span>
           </div>
         </div>

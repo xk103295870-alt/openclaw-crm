@@ -1,13 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { tServer } from "@/lib/i18n-server";
+import { useLanguage } from "@/components/language-provider";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const t = tServer;
+  const { language, setLanguage, t } = useLanguage();
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background">
       {/* Landing-tint gradient for visual continuity */}
@@ -20,6 +22,14 @@ export default function AuthLayout({
       />
 
       <div className="relative w-full max-w-sm px-4">
+        <div className="mb-4 flex justify-end">
+          <button
+            onClick={() => setLanguage(language === "zh" ? "en" : "zh")}
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            {language === "zh" ? t("language.toggleToEn") : t("language.toggleToZh")}
+          </button>
+        </div>
         <div className="mb-10 text-center">
           <Link
             href="/"

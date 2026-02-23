@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 import {
   Check,
   Circle,
@@ -22,7 +22,6 @@ import {
   FileText,
   ListTodo,
   Bot,
-  Upload,
   UserPlus,
   Sparkles,
   X,
@@ -54,15 +53,15 @@ interface RecentRecord {
   objectIcon: string;
 }
 
-function getGreeting(): string {
+function getGreeting(language: "en" | "zh"): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return language === "zh" ? "早上好" : "Good morning";
+  if (hour < 18) return language === "zh" ? "下午好" : "Good afternoon";
+  return language === "zh" ? "晚上好" : "Good evening";
 }
 
-function formatTodayDate(): string {
-  return new Date().toLocaleDateString(undefined, {
+function formatTodayDate(language: "en" | "zh"): string {
+  return new Date().toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -70,18 +69,20 @@ function formatTodayDate(): string {
   });
 }
 
-function relativeTime(dateStr: string): string {
+function relativeTime(dateStr: string, language: "en" | "zh"): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
   const diffMs = now - then;
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return language === "zh" ? "刚刚" : "just now";
+  if (diffMin < 60)
+    return language === "zh" ? `${diffMin} 分钟前` : `${diffMin}m ago`;
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}h ago`;
+  if (diffH < 24)
+    return language === "zh" ? `${diffH} 小时前` : `${diffH}h ago`;
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 7) return `${diffD}d ago`;
-  return new Date(dateStr).toLocaleDateString(undefined, {
+  if (diffD < 7) return language === "zh" ? `${diffD} 天前` : `${diffD}d ago`;
+  return new Date(dateStr).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", {
     month: "short",
     day: "numeric",
   });
@@ -93,45 +94,10 @@ const OBJECT_ICONS: Record<string, React.ReactNode> = {
   deals: <Handshake className="h-4 w-4" />,
 };
 
-// Onboarding steps
-const ONBOARDING_STEPS = [
-  {
-    id: "add-contact",
-    icon: UserPlus,
-    title: "Add your first contact",
-    description: "Import a spreadsheet or add someone manually",
-    href: "/objects/people",
-    color: "text-emerald-500",
-  },
-  {
-    id: "track-deal",
-    icon: Handshake,
-    title: "Track a deal",
-    description: "Create a deal to follow an opportunity through your pipeline",
-    href: "/objects/deals",
-    color: "text-amber-500",
-  },
-  {
-    id: "try-ai",
-    icon: Bot,
-    title: "Try the AI assistant",
-    description: "Ask questions about your data in plain English",
-    href: "/chat",
-    color: "text-violet-500",
-  },
-  {
-    id: "invite-team",
-    icon: Users,
-    title: "Invite your team",
-    description: "Add coworkers so everyone can collaborate",
-    href: "/settings/members",
-    color: "text-blue-500",
-  },
-];
-
 export default function HomePage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { language } = useLanguage();
 
   const [greeting, setGreeting] = useState("");
   const [todayDate, setTodayDate] = useState("");
@@ -160,9 +126,9 @@ export default function HomePage() {
 
   // Compute greeting/date client-side only to avoid hydration mismatch
   useEffect(() => {
-    setGreeting(getGreeting());
-    setTodayDate(formatTodayDate());
-  }, []);
+    setGreeting(getGreeting(language));
+    setTodayDate(formatTodayDate(language));
+  }, [language]);
 
   useEffect(() => {
     async function load() {
@@ -256,15 +222,71 @@ export default function HomePage() {
   let nudge = "";
   if (!loading && hasData) {
     if (overdueTasks.length > 0) {
-      nudge = `You have ${overdueTasks.length} overdue task${overdueTasks.length > 1 ? "s" : ""}`;
+      nudge =
+        language === "zh"
+          ? `你有 ${overdueTasks.length} 个逾期任务`
+          : `You have ${overdueTasks.length} overdue task${overdueTasks.length > 1 ? "s" : ""}`;
     } else if (todayTasks.length > 0) {
-      nudge = `${todayTasks.length} task${todayTasks.length > 1 ? "s" : ""} due today`;
+      nudge =
+        language === "zh"
+          ? `今天有 ${todayTasks.length} 个任务到期`
+          : `${todayTasks.length} task${todayTasks.length > 1 ? "s" : ""} due today`;
     } else if (stats.tasks > 0) {
-      nudge = `${stats.tasks} open task${stats.tasks > 1 ? "s" : ""} to work on`;
+      nudge =
+        language === "zh"
+          ? `还有 ${stats.tasks} 个待处理任务`
+          : `${stats.tasks} open task${stats.tasks > 1 ? "s" : ""} to work on`;
     } else {
-      nudge = "Everything looks good today";
+      nudge = language === "zh" ? "今天一切顺利" : "Everything looks good today";
     }
   }
+
+  const ONBOARDING_STEPS = [
+    {
+      id: "add-contact",
+      icon: UserPlus,
+      title: language === "zh" ? "添加第一个联系人" : "Add your first contact",
+      description:
+        language === "zh"
+          ? "导入表格或手动新增联系人"
+          : "Import a spreadsheet or add someone manually",
+      href: "/objects/people",
+      color: "text-emerald-500",
+    },
+    {
+      id: "track-deal",
+      icon: Handshake,
+      title: language === "zh" ? "跟进一笔交易" : "Track a deal",
+      description:
+        language === "zh"
+          ? "创建交易并在销售流程中推进"
+          : "Create a deal to follow an opportunity through your pipeline",
+      href: "/objects/deals",
+      color: "text-amber-500",
+    },
+    {
+      id: "try-ai",
+      icon: Bot,
+      title: language === "zh" ? "试试 AI 助手" : "Try the AI assistant",
+      description:
+        language === "zh"
+          ? "用自然语言提问你的 CRM 数据"
+          : "Ask questions about your data in plain English",
+      href: "/chat",
+      color: "text-violet-500",
+    },
+    {
+      id: "invite-team",
+      icon: Users,
+      title: language === "zh" ? "邀请团队成员" : "Invite your team",
+      description:
+        language === "zh"
+          ? "邀请同事协作管理客户和销售流程"
+          : "Add coworkers so everyone can collaborate",
+      href: "/settings/members",
+      color: "text-blue-500",
+    },
+  ];
 
   // Onboarding steps that haven't been dismissed
   const visibleSteps = ONBOARDING_STEPS.filter((s) => !dismissedSteps.includes(s.id));
@@ -293,7 +315,9 @@ export default function HomePage() {
           <div className="flex items-center justify-between px-5 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-medium">Get started</h2>
+              <h2 className="text-sm font-medium">
+                {language === "zh" ? "开始使用" : "Get started"}
+              </h2>
             </div>
             <button
               onClick={dismissOnboarding}
@@ -322,7 +346,7 @@ export default function HomePage() {
                 <button
                   onClick={(e) => { e.stopPropagation(); dismissStep(step.id); }}
                   className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground mt-0.5"
-                  title="Dismiss"
+                  title={language === "zh" ? "隐藏" : "Dismiss"}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -344,7 +368,11 @@ export default function HomePage() {
                 <div>
                   <p className="text-2xl font-bold">{stats.tasks}</p>
                   <p className="text-xs text-muted-foreground">
-                    {stats.tasks === 1 ? "open task" : "open tasks"}
+                    {language === "zh"
+                      ? "待办任务"
+                      : stats.tasks === 1
+                        ? "open task"
+                        : "open tasks"}
                   </p>
                 </div>
               </CardContent>
@@ -360,7 +388,11 @@ export default function HomePage() {
                 <div>
                   <p className="text-2xl font-bold">{stats.people}</p>
                   <p className="text-xs text-muted-foreground">
-                    {stats.people === 1 ? "contact" : "contacts"}
+                    {language === "zh"
+                      ? "联系人"
+                      : stats.people === 1
+                        ? "contact"
+                        : "contacts"}
                   </p>
                 </div>
               </CardContent>
@@ -376,7 +408,11 @@ export default function HomePage() {
                 <div>
                   <p className="text-2xl font-bold">{stats.companies}</p>
                   <p className="text-xs text-muted-foreground">
-                    {stats.companies === 1 ? "company" : "companies"}
+                    {language === "zh"
+                      ? "公司"
+                      : stats.companies === 1
+                        ? "company"
+                        : "companies"}
                   </p>
                 </div>
               </CardContent>
@@ -392,7 +428,11 @@ export default function HomePage() {
                 <div>
                   <p className="text-2xl font-bold">{stats.deals}</p>
                   <p className="text-xs text-muted-foreground">
-                    {stats.deals === 1 ? "deal in pipeline" : "deals in pipeline"}
+                    {language === "zh"
+                      ? "销售交易"
+                      : stats.deals === 1
+                        ? "deal in pipeline"
+                        : "deals in pipeline"}
                   </p>
                 </div>
               </CardContent>
@@ -411,8 +451,12 @@ export default function HomePage() {
             <UserPlus className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm font-medium">Add a contact</p>
-            <p className="text-xs text-muted-foreground">Person or lead</p>
+            <p className="text-sm font-medium">
+              {language === "zh" ? "添加联系人" : "Add a contact"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {language === "zh" ? "新增联系人" : "Person or lead"}
+            </p>
           </div>
         </button>
 
@@ -424,8 +468,12 @@ export default function HomePage() {
             <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
           </div>
           <div>
-            <p className="text-sm font-medium">Add a company</p>
-            <p className="text-xs text-muted-foreground">Organization</p>
+            <p className="text-sm font-medium">
+              {language === "zh" ? "添加公司" : "Add a company"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {language === "zh" ? "组织机构" : "Organization"}
+            </p>
           </div>
         </button>
 
@@ -437,8 +485,12 @@ export default function HomePage() {
             <Plus className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-medium">Track a deal</p>
-            <p className="text-xs text-muted-foreground">Sales opportunity</p>
+            <p className="text-sm font-medium">
+              {language === "zh" ? "跟进交易" : "Track a deal"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {language === "zh" ? "销售机会" : "Sales opportunity"}
+            </p>
           </div>
         </button>
 
@@ -450,7 +502,9 @@ export default function HomePage() {
             <Search className="h-4 w-4 text-muted-foreground" />
           </div>
           <div>
-            <p className="text-sm font-medium">Search everything</p>
+            <p className="text-sm font-medium">
+              {language === "zh" ? "全局搜索" : "Search everything"}
+            </p>
             <p className="text-xs text-muted-foreground">Ctrl+K</p>
           </div>
         </button>
@@ -463,13 +517,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-blue-500" />
-              <h2 className="text-sm font-medium">My Tasks</h2>
+              <h2 className="text-sm font-medium">
+                {language === "zh" ? "我的任务" : "My Tasks"}
+              </h2>
             </div>
             <Link
               href="/tasks"
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
-              View all
+              {language === "zh" ? "查看全部" : "View all"}
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -478,23 +534,27 @@ export default function HomePage() {
             {loading && tasks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <CheckSquare className="h-8 w-8 mb-2 opacity-30" />
-                <p className="text-xs">Loading tasks...</p>
+                <p className="text-xs">
+                  {language === "zh" ? "任务加载中..." : "Loading tasks..."}
+                </p>
               </div>
             )}
             {!loading && tasks.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <CheckSquare className="h-8 w-8 mb-2 opacity-30" />
-                <p className="text-xs">No tasks yet</p>
+                <p className="text-xs">
+                  {language === "zh" ? "暂无任务" : "No tasks yet"}
+                </p>
                 <p className="text-xs mt-1">
-                  Create one from any{" "}
+                  {language === "zh" ? "可在任意" : "Create one from any"}{" "}
                   <Link href="/objects/people" className="text-primary hover:underline">
-                    contact
+                    {language === "zh" ? "联系人" : "contact"}
                   </Link>
-                  {" "}or{" "}
+                  {language === "zh" ? "或" : " or "}
                   <Link href="/objects/deals" className="text-primary hover:underline">
-                    deal
+                    {language === "zh" ? "交易" : "deal"}
                   </Link>
-                  {" "}page
+                  {language === "zh" ? "页面创建任务" : " page"}
                 </p>
               </div>
             )}
@@ -553,10 +613,13 @@ export default function HomePage() {
                       )}
                     >
                       <Calendar className="h-3 w-3" />
-                      {new Date(task.deadline).toLocaleDateString(undefined, {
+                      {new Date(task.deadline).toLocaleDateString(
+                        language === "zh" ? "zh-CN" : "en-US",
+                        {
                         month: "short",
                         day: "numeric",
-                      })}
+                      }
+                      )}
                     </span>
                   )}
                 </div>
@@ -570,13 +633,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <StickyNote className="h-4 w-4 text-amber-500" />
-              <h2 className="text-sm font-medium">Recent Notes</h2>
+              <h2 className="text-sm font-medium">
+                {language === "zh" ? "最近笔记" : "Recent Notes"}
+              </h2>
             </div>
             <Link
               href="/notes"
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
-              View all
+              {language === "zh" ? "查看全部" : "View all"}
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -585,19 +650,25 @@ export default function HomePage() {
             {loading && notes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <StickyNote className="h-8 w-8 mb-2 opacity-30" />
-                <p className="text-xs">Loading notes...</p>
+                <p className="text-xs">
+                  {language === "zh" ? "笔记加载中..." : "Loading notes..."}
+                </p>
               </div>
             )}
             {!loading && notes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <StickyNote className="h-8 w-8 mb-2 opacity-30" />
-                <p className="text-xs">No notes yet</p>
+                <p className="text-xs">
+                  {language === "zh" ? "暂无笔记" : "No notes yet"}
+                </p>
                 <p className="text-xs mt-1">
-                  Open a{" "}
+                  {language === "zh" ? "打开一个" : "Open a"}{" "}
                   <Link href="/objects/people" className="text-primary hover:underline">
-                    contact
+                    {language === "zh" ? "联系人" : "contact"}
                   </Link>
-                  {" "}to write your first note
+                  {language === "zh"
+                    ? "，写下你的第一条笔记"
+                    : " to write your first note"}
                 </p>
               </div>
             )}
@@ -608,7 +679,7 @@ export default function HomePage() {
                 className="block px-4 py-3 hover:bg-muted/40 transition-colors"
               >
                 <p className="text-sm font-medium truncate">
-                  {note.title || "Untitled"}
+                  {note.title || (language === "zh" ? "未命名" : "Untitled")}
                 </p>
                 {note.content && typeof note.content === "string" && (
                   <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">
@@ -616,7 +687,7 @@ export default function HomePage() {
                   </p>
                 )}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {note.recordDisplayName} · {relativeTime(note.updatedAt)}
+                  {note.recordDisplayName} · {relativeTime(note.updatedAt, language)}
                 </p>
               </Link>
             ))}
@@ -627,7 +698,9 @@ export default function HomePage() {
       {/* ── Recent Records ───────────────────────────── */}
       {recentRecords.length > 0 && (
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">Recent Records</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            {language === "zh" ? "最近访问记录" : "Recent Records"}
+          </h2>
           <Card>
             <div className="divide-y divide-border/50">
               {recentRecords.map((rec) => (
@@ -660,9 +733,13 @@ export default function HomePage() {
                 <Bot className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">Ask your CRM anything</p>
+                <p className="text-sm font-medium">
+                  {language === "zh" ? "向 CRM 提任何问题" : "Ask your CRM anything"}
+                </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  &quot;Show me deals closing this month&quot; or &quot;How many contacts did I add this week?&quot;
+                  {language === "zh"
+                    ? "例如：“展示本月即将成交的交易” 或 “本周新增了多少联系人？”"
+                    : "\"Show me deals closing this month\" or \"How many contacts did I add this week?\""}
                 </p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors shrink-0" />

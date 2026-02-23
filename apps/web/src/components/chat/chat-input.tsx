@@ -3,6 +3,7 @@
 import { useRef, useEffect, KeyboardEvent } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/language-provider";
 
 interface ChatInputProps {
   value: string;
@@ -13,6 +14,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSend, disabled, streaming }: ChatInputProps) {
+  const { language } = useLanguage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -39,7 +41,11 @@ export function ChatInput({ value, onChange, onSend, disabled, streaming }: Chat
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask about your CRM data..."
+          placeholder={
+            language === "zh"
+              ? "询问你的 CRM 数据..."
+              : "Ask about your CRM data..."
+          }
           disabled={disabled}
           rows={1}
           className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

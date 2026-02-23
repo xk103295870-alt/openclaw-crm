@@ -4,6 +4,7 @@ import type { SortConfig } from "@openclaw-crm/shared";
 import type { AttributeType } from "@openclaw-crm/shared";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, X, ArrowUp, ArrowDown } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface AttributeDef {
   id: string;
@@ -25,6 +26,8 @@ export function SortBuilder({
   onChange,
   onClose,
 }: SortBuilderProps) {
+  const { language } = useLanguage();
+
   // Only show sortable attributes (exclude json-stored ones like location, personal_name)
   const sortableAttrs = attributes.filter(
     (a) =>
@@ -55,7 +58,7 @@ export function SortBuilder({
   return (
     <div className="w-[360px] space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Sort</h3>
+        <h3 className="text-sm font-medium">{language === "zh" ? "排序" : "Sort"}</h3>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
@@ -66,7 +69,13 @@ export function SortBuilder({
           {sorts.map((sort, index) => (
             <div key={index} className="flex items-center gap-2">
               <span className="w-14 shrink-0 text-xs text-muted-foreground text-right">
-                {index === 0 ? "Sort by" : "then by"}
+                {index === 0
+                  ? language === "zh"
+                    ? "按"
+                    : "Sort by"
+                  : language === "zh"
+                    ? "再按"
+                    : "then by"}
               </span>
 
               {/* Attribute select */}
@@ -96,12 +105,12 @@ export function SortBuilder({
                 {sort.direction === "asc" ? (
                   <>
                     <ArrowUp className="h-3 w-3" />
-                    Asc
+                    {language === "zh" ? "升序" : "Asc"}
                   </>
                 ) : (
                   <>
                     <ArrowDown className="h-3 w-3" />
-                    Desc
+                    {language === "zh" ? "降序" : "Desc"}
                   </>
                 )}
               </button>
@@ -120,7 +129,9 @@ export function SortBuilder({
 
       {sorts.length === 0 && (
         <p className="text-xs text-muted-foreground py-2">
-          No sorts applied. Records are sorted by creation date.
+          {language === "zh"
+            ? "当前未设置排序。记录将按创建时间排序。"
+            : "No sorts applied. Records are sorted by creation date."}
         </p>
       )}
 
@@ -132,7 +143,7 @@ export function SortBuilder({
         disabled={sorts.length >= sortableAttrs.length}
       >
         <Plus className="mr-1 h-3.5 w-3.5" />
-        Add sort
+        {language === "zh" ? "添加排序" : "Add sort"}
       </Button>
     </div>
   );

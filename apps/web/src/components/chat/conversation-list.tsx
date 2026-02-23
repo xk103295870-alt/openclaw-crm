@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { MessageSquare, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/language-provider";
 
 interface Conversation {
   id: string;
@@ -25,6 +26,7 @@ export function ConversationList({
   onNew,
   onDelete,
 }: ConversationListProps) {
+  const { language } = useLanguage();
   return (
     <div className="flex h-full flex-col">
       <div className="p-3 border-b border-border">
@@ -35,14 +37,14 @@ export function ConversationList({
           size="sm"
         >
           <Plus className="h-4 w-4" />
-          New Chat
+          {language === "zh" ? "新建对话" : "New Chat"}
         </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {conversations.length === 0 && (
           <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-            No conversations yet
+            {language === "zh" ? "还没有对话" : "No conversations yet"}
           </p>
         )}
         {conversations.map((conv) => (

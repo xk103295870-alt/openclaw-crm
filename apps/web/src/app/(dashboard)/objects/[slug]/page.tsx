@@ -13,6 +13,7 @@ import { Popover } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CSVImportModal } from "@/components/records/csv-import-modal";
 import { generateCSV, downloadCSV } from "@/lib/csv-utils";
+import { useLanguage } from "@/components/language-provider";
 import {
   Plus,
   RefreshCw,
@@ -26,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function ObjectPage() {
+  const { language } = useLanguage();
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const slug = params.slug;
@@ -63,7 +65,7 @@ export default function ObjectPage() {
   if (loading && !object) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Loading...
+        {language === "zh" ? "加载中..." : "Loading..."}
       </div>
     );
   }
@@ -71,7 +73,7 @@ export default function ObjectPage() {
   if (!object) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        Object not found
+        {language === "zh" ? "对象不存在" : "Object not found"}
       </div>
     );
   }
@@ -83,7 +85,8 @@ export default function ObjectPage() {
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-semibold">{object.pluralName}</h1>
           <span className="text-sm text-muted-foreground">
-            {total} {total === 1 ? "record" : "records"}
+            {total}{" "}
+            {language === "zh" ? "条记录" : total === 1 ? "record" : "records"}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -102,7 +105,7 @@ export default function ObjectPage() {
                 )}
               >
                 <Filter className="h-3.5 w-3.5" />
-                Filter
+                {language === "zh" ? "筛选" : "Filter"}
                 {hasFilter && (
                   <span className="ml-0.5 rounded-full bg-primary/20 px-1.5 text-[10px] text-primary">
                     {filter.conditions.length}
@@ -134,7 +137,7 @@ export default function ObjectPage() {
                 )}
               >
                 <ArrowUpDown className="h-3.5 w-3.5" />
-                Sort
+                {language === "zh" ? "排序" : "Sort"}
                 {hasSort && (
                   <span className="ml-0.5 rounded-full bg-primary/20 px-1.5 text-[10px] text-primary">
                     {sorts.length}
@@ -164,7 +167,7 @@ export default function ObjectPage() {
                 )}
               >
                 <Table2 className="h-3.5 w-3.5" />
-                Table
+                {language === "zh" ? "表格" : "Table"}
               </button>
               <button
                 onClick={() => setView("board")}
@@ -176,7 +179,7 @@ export default function ObjectPage() {
                 )}
               >
                 <Kanban className="h-3.5 w-3.5" />
-                Board
+                {language === "zh" ? "看板" : "Board"}
               </button>
             </div>
           )}
@@ -192,7 +195,7 @@ export default function ObjectPage() {
             }}
           >
             <Download className="h-3.5 w-3.5" />
-            Export
+            {language === "zh" ? "导出" : "Export"}
           </Button>
           <Button
             variant="ghost"
@@ -201,7 +204,7 @@ export default function ObjectPage() {
             onClick={() => setImportOpen(true)}
           >
             <Upload className="h-3.5 w-3.5" />
-            Import
+            {language === "zh" ? "导入" : "Import"}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={fetchData} disabled={loading}>
@@ -209,7 +212,7 @@ export default function ObjectPage() {
           </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
-            New {object.singularName}
+            {language === "zh" ? `新建${object.singularName}` : `New ${object.singularName}`}
           </Button>
         </div>
       </div>
@@ -229,7 +232,9 @@ export default function ObjectPage() {
       {/* Active sort indicator */}
       {hasSort && (
         <div className="border-b border-border/50 px-4 py-1.5 flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Sorted by:</span>
+          <span className="text-xs text-muted-foreground">
+            {language === "zh" ? "排序依据：" : "Sorted by:"}
+          </span>
           {sorts.map((sort, i) => {
             const attr = object.attributes.find((a) => a.slug === sort.attribute);
             return (
@@ -246,7 +251,7 @@ export default function ObjectPage() {
             onClick={clearSorts}
             className="text-xs text-muted-foreground hover:text-foreground ml-2"
           >
-            Clear
+            {language === "zh" ? "清除" : "Clear"}
           </button>
         </div>
       )}

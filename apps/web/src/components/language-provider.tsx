@@ -2,14 +2,18 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { translate, type Language } from "@/lib/i18n";
+import {
+  translate,
+  type Language,
+  type TranslationParams,
+} from "@/lib/i18n";
 
 const LANGUAGE_COOKIE_KEY = "oc_lang";
 
 interface LanguageContextValue {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: TranslationParams) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(
@@ -18,8 +22,14 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 
 const STORAGE_KEY = "openclaw-crm.language";
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("zh");
+export function LanguageProvider({
+  children,
+  initialLanguage = "zh",
+}: {
+  children: ReactNode;
+  initialLanguage?: Language;
+}) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
 
   useEffect(() => {
     try {
@@ -59,7 +69,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value: LanguageContextValue = {
     language,
     setLanguage,
-    t: (key: string) => translate(language, key),
+    t: (key: string, params?: TranslationParams) =>
+      translate(language, key, params),
   };
 
   return (

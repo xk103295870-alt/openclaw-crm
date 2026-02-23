@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, UserPlus, Trash2, Shield, User } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface Member {
   id: string;
@@ -15,6 +16,7 @@ interface Member {
 }
 
 export default function MembersPage() {
+  const { language, t } = useLanguage();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
@@ -55,7 +57,7 @@ export default function MembersPage() {
         fetchMembers();
       } else {
         const data = await res.json();
-        setError(data.error?.message ?? "Failed to add member");
+        setError(data.error?.message ?? t("settings.members.error.addFailed"));
       }
     } finally {
       setAdding(false);
@@ -74,7 +76,7 @@ export default function MembersPage() {
       );
     } else {
       const data = await res.json();
-      setError(data.error?.message ?? "Failed to change role");
+      setError(data.error?.message ?? t("settings.members.error.changeRoleFailed"));
     }
   }
 
@@ -86,18 +88,18 @@ export default function MembersPage() {
       setMembers((prev) => prev.filter((m) => m.id !== memberId));
     } else {
       const data = await res.json();
-      setError(data.error?.message ?? "Failed to remove member");
+      setError(data.error?.message ?? t("settings.members.error.removeFailed"));
     }
   }
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold mb-6">Members</h1>
+      <h1 className="text-xl font-semibold mb-6">{t("settings.members.title")}</h1>
 
       {/* Add member form */}
       <form onSubmit={handleAdd} className="flex items-end gap-3 mb-6">
         <div className="flex-1 space-y-1">
-          <label className="text-sm font-medium">Add Member by Email</label>
+          <label className="text-sm font-medium">{t("settings.members.addByEmail")}</label>
           <input
             type="email"
             value={email}
@@ -111,8 +113,8 @@ export default function MembersPage() {
           onChange={(e) => setAddRole(e.target.value as "admin" | "member")}
           className="rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
+          <option value="member">{t("workspace.role.member")}</option>
+          <option value="admin">{t("workspace.role.admin")}</option>
         </select>
         <Button type="submit" disabled={adding || !email.trim()}>
           {adding ? (
@@ -120,7 +122,7 @@ export default function MembersPage() {
           ) : (
             <UserPlus className="mr-1 h-4 w-4" />
           )}
-          Add
+          {t("common.add")}
         </Button>
       </form>
 
@@ -131,7 +133,7 @@ export default function MembersPage() {
             onClick={() => setError("")}
             className="ml-2 underline hover:no-underline"
           >
-            dismiss
+            {t("common.dismiss")}
           </button>
         </div>
       )}
@@ -146,10 +148,10 @@ export default function MembersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium">User</th>
-                <th className="px-4 py-3 text-left font-medium">Role</th>
-                <th className="px-4 py-3 text-left font-medium">Joined</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.members.table.user")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.members.table.role")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("settings.members.table.joined")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("settings.members.table.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -179,12 +181,14 @@ export default function MembersPage() {
                       }
                       className="rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                     >
-                      <option value="admin">Admin</option>
-                      <option value="member">Member</option>
+                      <option value="admin">{t("workspace.role.admin")}</option>
+                      <option value="member">{t("workspace.role.member")}</option>
                     </select>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(member.createdAt).toLocaleDateString()}
+                    {new Date(member.createdAt).toLocaleDateString(
+                      language === "zh" ? "zh-CN" : "en-US"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button
@@ -202,7 +206,7 @@ export default function MembersPage() {
           </table>
           {members.length === 0 && (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No members yet
+              {t("settings.members.empty")}
             </div>
           )}
         </div>

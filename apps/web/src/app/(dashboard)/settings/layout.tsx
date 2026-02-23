@@ -4,14 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Settings, Users, Box, KeyRound, Bot, Puzzle } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 const settingsNav = [
-  { href: "/settings", label: "General", icon: Settings, exact: true },
-  { href: "/settings/members", label: "Members", icon: Users, exact: false },
-  { href: "/settings/objects", label: "Objects", icon: Box, exact: false },
-  { href: "/settings/api-keys", label: "API Keys", icon: KeyRound, exact: false },
-  { href: "/settings/ai", label: "AI Agent", icon: Bot, exact: false },
-  { href: "/settings/openclaw", label: "OpenClaw", icon: Puzzle, exact: false },
+  { href: "/settings", labelKey: "settings.nav.general", icon: Settings, exact: true },
+  { href: "/settings/members", labelKey: "settings.nav.members", icon: Users, exact: false },
+  { href: "/settings/objects", labelKey: "settings.nav.objects", icon: Box, exact: false },
+  { href: "/settings/api-keys", labelKey: "settings.nav.apiKeys", icon: KeyRound, exact: false },
+  { href: "/settings/ai", labelKey: "settings.nav.aiAgent", icon: Bot, exact: false },
+  { href: "/settings/openclaw", labelKey: "settings.nav.openclaw", icon: Puzzle, exact: false },
 ];
 
 export default function SettingsLayout({
@@ -20,12 +21,13 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <div className="flex h-full">
       {/* Settings sidebar */}
       <nav className="w-52 border-r border-border p-4 space-y-1">
-        <h2 className="text-lg font-semibold mb-4">Settings</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("nav.settings")}</h2>
         {settingsNav.map((item) => {
           const active = item.exact
             ? pathname === item.href
@@ -42,7 +44,7 @@ export default function SettingsLayout({
               )}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}

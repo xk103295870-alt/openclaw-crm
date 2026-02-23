@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Users, Building2, Handshake, Box, ArrowUpRight } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface RelatedRecord {
   recordId: string;
@@ -24,10 +25,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function RelatedRecords({ related, forward }: RelatedRecordsProps) {
+  const { language } = useLanguage();
+
   if (related.length === 0 && forward.length === 0) {
     return (
       <div className="px-3 py-4 text-sm text-muted-foreground">
-        No related records.
+        {language === "zh" ? "暂无关联记录。" : "No related records."}
       </div>
     );
   }
@@ -38,7 +41,7 @@ export function RelatedRecords({ related, forward }: RelatedRecordsProps) {
       {forward.length > 0 && (
         <div>
           <h4 className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            References
+            {language === "zh" ? "引用" : "References"}
           </h4>
           <div className="space-y-0.5">
             {forward.map((ref) => (
@@ -52,7 +55,7 @@ export function RelatedRecords({ related, forward }: RelatedRecordsProps) {
       {related.length > 0 && (
         <div>
           <h4 className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Referenced By
+            {language === "zh" ? "被引用" : "Referenced By"}
           </h4>
           <div className="space-y-0.5">
             {related.map((ref) => (

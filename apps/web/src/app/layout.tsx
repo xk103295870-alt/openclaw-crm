@@ -39,19 +39,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const language = getRequestLanguage();
+  const language = await getRequestLanguage();
   return (
     <html lang={language === "zh" ? "zh-CN" : "en"} suppressHydrationWarning>
       <body className={inter.className}>
         <PlausibleScript />
         <GA4Script />
         <ThemeProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider initialLanguage={language}>{children}</LanguageProvider>
         </ThemeProvider>
         <CookieConsent />
       </body>

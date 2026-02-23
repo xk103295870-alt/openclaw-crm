@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 const MODELS = [
   { value: "anthropic/claude-sonnet-4", label: "Claude Sonnet 4" },
@@ -17,6 +18,7 @@ const MODELS = [
 ];
 
 export default function AISettingsPage() {
+  const { t } = useLanguage();
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("anthropic/claude-sonnet-4");
   const [hasApiKey, setHasApiKey] = useState(false);
@@ -74,14 +76,16 @@ export default function AISettingsPage() {
       const data = await res.json();
       if (res.ok && data.data?.success) {
         setTestResult("success");
-        setTestMessage("Connection successful");
+        setTestMessage(t("settings.ai.test.success"));
       } else {
         setTestResult("error");
-        setTestMessage(data.error?.message || data.data?.error || "Connection failed");
+        setTestMessage(
+          data.error?.message || data.data?.error || t("settings.ai.test.failed")
+        );
       }
     } catch {
       setTestResult("error");
-      setTestMessage("Network error");
+      setTestMessage(t("common.networkError"));
     } finally {
       setTesting(false);
     }
@@ -90,20 +94,20 @@ export default function AISettingsPage() {
   return (
     <div className="max-w-xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">AI Agent</h1>
+        <h1 className="text-2xl font-bold">{t("settings.ai.title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure the AI assistant that can answer questions about your CRM data and take actions on your behalf.
+          {t("settings.ai.subtitle")}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="apiKey">OpenRouter API Key</Label>
+          <Label htmlFor="apiKey">{t("settings.ai.apiKey")}</Label>
           <div className="relative">
             <Input
               id="apiKey"
               type={showKey ? "text" : "password"}
-              placeholder={hasApiKey ? "••••••••••••••••" : "sk-or-v1-..."}
+              placeholder={hasApiKey ? "••••••••••••••••" : t("settings.ai.apiKeyPlaceholder")}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="pr-10"
@@ -117,10 +121,12 @@ export default function AISettingsPage() {
             </button>
           </div>
           {hasApiKey && !apiKey && (
-            <p className="text-xs text-muted-foreground">API key is set. Enter a new key to replace it.</p>
+            <p className="text-xs text-muted-foreground">
+              {t("settings.ai.apiKeySetHint")}
+            </p>
           )}
           <p className="text-xs text-muted-foreground">
-            Get your API key from{" "}
+            {t("settings.ai.apiKeyHint")}{" "}
             <a
               href="https://openrouter.ai/keys"
               target="_blank"
@@ -133,7 +139,7 @@ export default function AISettingsPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="model">Model</Label>
+          <Label htmlFor="model">{t("settings.ai.model")}</Label>
           <select
             id="model"
             value={model}
@@ -151,11 +157,11 @@ export default function AISettingsPage() {
         <div className="flex items-center gap-3 pt-2">
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Save
+            {t("common.save")}
           </Button>
           <Button variant="outline" onClick={handleTest} disabled={testing || (!hasApiKey && !apiKey)}>
             {testing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Test Connection
+            {t("settings.ai.testConnection")}
           </Button>
           {testResult && (
             <span className={`flex items-center gap-1 text-sm ${testResult === "success" ? "text-green-600" : "text-red-600"}`}>

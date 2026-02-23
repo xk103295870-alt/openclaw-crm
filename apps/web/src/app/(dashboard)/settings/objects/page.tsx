@@ -12,6 +12,7 @@ import {
   Lock,
 } from "lucide-react";
 import { ATTRIBUTE_TYPES } from "@openclaw-crm/shared";
+import { useLanguage } from "@/components/language-provider";
 
 interface Attribute {
   id: string;
@@ -34,6 +35,7 @@ interface ObjectDef {
 }
 
 export default function ObjectSettingsPage() {
+  const { t } = useLanguage();
   const [objects, setObjects] = useState<ObjectDef[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedObject, setExpandedObject] = useState<string | null>(null);
@@ -107,7 +109,7 @@ export default function ObjectSettingsPage() {
         setNewAttrType("text");
       } else {
         const data = await res.json();
-        setError(data.error?.message ?? "Failed to add attribute");
+        setError(data.error?.message ?? t("settings.objects.error.addAttributeFailed"));
       }
     } finally {
       setAddingFor(null);
@@ -132,7 +134,7 @@ export default function ObjectSettingsPage() {
       }));
     } else {
       const data = await res.json();
-      setError(data.error?.message ?? "Failed to delete attribute");
+      setError(data.error?.message ?? t("settings.objects.error.deleteAttributeFailed"));
     }
   }
 
@@ -146,7 +148,7 @@ export default function ObjectSettingsPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-xl font-semibold mb-6">Objects</h1>
+      <h1 className="text-xl font-semibold mb-6">{t("settings.objects.title")}</h1>
 
       {error && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -155,7 +157,7 @@ export default function ObjectSettingsPage() {
             onClick={() => setError("")}
             className="ml-2 underline hover:no-underline"
           >
-            dismiss
+            {t("common.dismiss")}
           </button>
         </div>
       )}
@@ -193,7 +195,7 @@ export default function ObjectSettingsPage() {
                 {obj.isSystem && (
                   <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     <Lock className="h-3 w-3" />
-                    System
+                    {t("settings.objects.system")}
                   </span>
                 )}
               </button>
@@ -212,16 +214,16 @@ export default function ObjectSettingsPage() {
                         <thead>
                           <tr className="border-b bg-muted/30">
                             <th className="px-4 py-2 text-left font-medium">
-                              Title
+                              {t("settings.objects.table.title")}
                             </th>
                             <th className="px-4 py-2 text-left font-medium">
-                              Slug
+                              {t("settings.objects.table.slug")}
                             </th>
                             <th className="px-4 py-2 text-left font-medium">
-                              Type
+                              {t("settings.objects.table.type")}
                             </th>
                             <th className="px-4 py-2 text-right font-medium">
-                              Actions
+                              {t("settings.objects.table.actions")}
                             </th>
                           </tr>
                         </thead>
@@ -273,7 +275,7 @@ export default function ObjectSettingsPage() {
                                 colSpan={4}
                                 className="px-4 py-4 text-center text-muted-foreground"
                               >
-                                No attributes
+                                {t("settings.objects.emptyAttributes")}
                               </td>
                             </tr>
                           )}
@@ -283,7 +285,7 @@ export default function ObjectSettingsPage() {
                       {/* Add attribute form */}
                       <div className="flex items-end gap-2 border-t border-border px-4 py-3 bg-muted/20">
                         <div className="space-y-1">
-                          <label className="text-xs font-medium">Title</label>
+                          <label className="text-xs font-medium">{t("settings.objects.field.title")}</label>
                           <input
                             type="text"
                             value={newAttrTitle}
@@ -296,22 +298,22 @@ export default function ObjectSettingsPage() {
                                   .replace(/^_|_$/g, "")
                               );
                             }}
-                            placeholder="Attribute title"
+                            placeholder={t("settings.objects.placeholder.attributeTitle")}
                             className="w-40 rounded border border-input bg-background px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-medium">Slug</label>
+                          <label className="text-xs font-medium">{t("settings.objects.field.slug")}</label>
                           <input
                             type="text"
                             value={newAttrSlug}
                             onChange={(e) => setNewAttrSlug(e.target.value)}
-                            placeholder="attribute_slug"
+                            placeholder={t("settings.objects.placeholder.attributeSlug")}
                             className="w-36 rounded border border-input bg-background px-2 py-1.5 text-xs font-mono outline-none focus:ring-1 focus:ring-ring"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-medium">Type</label>
+                          <label className="text-xs font-medium">{t("settings.objects.field.type")}</label>
                           <select
                             value={newAttrType}
                             onChange={(e) => setNewAttrType(e.target.value)}
@@ -339,7 +341,7 @@ export default function ObjectSettingsPage() {
                           ) : (
                             <Plus className="mr-1 h-3 w-3" />
                           )}
-                          Add
+                          {t("common.add")}
                         </Button>
                       </div>
                     </>

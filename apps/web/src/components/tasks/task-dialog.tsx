@@ -31,6 +31,7 @@ import {
   endOfWeek,
   addWeeks,
 } from "date-fns";
+import { useLanguage } from "@/components/language-provider";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ export function TaskDialog({
   onSave,
   onDelete,
 }: TaskDialogProps) {
+  const { language } = useLanguage();
   const [content, setContent] = useState("");
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
@@ -331,9 +333,9 @@ export function TaskDialog({
   }
 
   function getDeadlineLabel(): string {
-    if (!deadline) return "No date";
-    if (isToday(deadline)) return "Today";
-    if (isTomorrow(deadline)) return "Tomorrow";
+    if (!deadline) return language === "zh" ? "无日期" : "No date";
+    if (isToday(deadline)) return language === "zh" ? "今天" : "Today";
+    if (isTomorrow(deadline)) return language === "zh" ? "明天" : "Tomorrow";
     return format(deadline, "MMM d");
   }
 
@@ -381,12 +383,22 @@ export function TaskDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Create task" : "Edit task"}
+            {mode === "create"
+              ? language === "zh"
+                ? "创建任务"
+                : "Create task"
+              : language === "zh"
+                ? "编辑任务"
+                : "Edit task"}
           </DialogTitle>
           <DialogDescription className="sr-only">
             {mode === "create"
-              ? "Fill in the details to create a new task"
-              : "Edit the task details"}
+              ? language === "zh"
+                ? "填写信息以创建新任务"
+                : "Fill in the details to create a new task"
+              : language === "zh"
+                ? "编辑任务详情"
+                : "Edit the task details"}
           </DialogDescription>
         </DialogHeader>
 
@@ -396,7 +408,7 @@ export function TaskDialog({
             ref={contentRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="What needs to be done?"
+            placeholder={language === "zh" ? "需要完成什么？" : "What needs to be done?"}
             className="text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
@@ -445,7 +457,7 @@ export function TaskDialog({
                       className="text-xs h-7"
                       onClick={() => setQuickDate("today")}
                     >
-                      Today
+                      {language === "zh" ? "今天" : "Today"}
                     </Button>
                     <Button
                       variant="ghost"
@@ -453,7 +465,7 @@ export function TaskDialog({
                       className="text-xs h-7"
                       onClick={() => setQuickDate("tomorrow")}
                     >
-                      Tomorrow
+                      {language === "zh" ? "明天" : "Tomorrow"}
                     </Button>
                     <Button
                       variant="ghost"
@@ -461,7 +473,7 @@ export function TaskDialog({
                       className="text-xs h-7"
                       onClick={() => setQuickDate("next_week")}
                     >
-                      Next week
+                      {language === "zh" ? "下周" : "Next week"}
                     </Button>
                     <Button
                       variant="ghost"
@@ -469,7 +481,7 @@ export function TaskDialog({
                       className="text-xs h-7"
                       onClick={() => setQuickDate("none")}
                     >
-                      No date
+                      {language === "zh" ? "无日期" : "No date"}
                     </Button>
                   </div>
                 </div>
@@ -493,12 +505,18 @@ export function TaskDialog({
                 }}
               >
                 <User className="h-3.5 w-3.5" />
-                {assignedMembers.length > 0
-                  ? assignedMembers.length === 1 &&
+                  {assignedMembers.length > 0
+                    ? assignedMembers.length === 1 &&
                     assignedMembers[0].userId === currentUserId
-                    ? "Assigned to You"
-                    : `${assignedMembers.length} assignee${assignedMembers.length > 1 ? "s" : ""}`
-                  : "Assign"}
+                    ? language === "zh"
+                      ? "已分配给你"
+                      : "Assigned to You"
+                    : language === "zh"
+                      ? `${assignedMembers.length} 位负责人`
+                      : `${assignedMembers.length} assignee${assignedMembers.length > 1 ? "s" : ""}`
+                  : language === "zh"
+                    ? "分配"
+                    : "Assign"}
               </Button>
               {assigneePickerOpen && (
                 <div className="absolute top-full left-0 z-50 mt-1 w-56 rounded-lg border border-border bg-popover shadow-lg">
@@ -508,7 +526,7 @@ export function TaskDialog({
                       <Input
                         value={memberSearch}
                         onChange={(e) => setMemberSearch(e.target.value)}
-                        placeholder="Find a user..."
+                        placeholder={language === "zh" ? "搜索用户..." : "Find a user..."}
                         className="h-8 pl-8 text-xs"
                         autoFocus
                       />
@@ -517,7 +535,7 @@ export function TaskDialog({
                   <div className="max-h-40 overflow-auto px-1 pb-2">
                     {filteredMembers.length === 0 && (
                       <p className="px-2 py-3 text-center text-xs text-muted-foreground">
-                        No users
+                        {language === "zh" ? "暂无用户" : "No users"}
                       </p>
                     )}
                     {filteredMembers.map((m) => (
@@ -531,7 +549,8 @@ export function TaskDialog({
                         </div>
                         <span className="flex-1 truncate text-left text-xs">
                           {m.name || m.email}
-                          {m.userId === currentUserId && " (You)"}
+                          {m.userId === currentUserId &&
+                            (language === "zh" ? "（你）" : " (You)")}
                         </span>
                         {assigneeIds.includes(m.userId) && (
                           <Check className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -563,8 +582,12 @@ export function TaskDialog({
               >
                 <Link2 className="h-3.5 w-3.5" />
                 {linkedRecords.length > 0
-                  ? `${linkedRecords.length} linked record${linkedRecords.length > 1 ? "s" : ""}`
-                  : "Add record"}
+                  ? language === "zh"
+                    ? `已关联 ${linkedRecords.length} 条记录`
+                    : `${linkedRecords.length} linked record${linkedRecords.length > 1 ? "s" : ""}`
+                  : language === "zh"
+                    ? "添加记录"
+                    : "Add record"}
               </Button>
               {recordPickerOpen && (
                 <div className="absolute top-full left-0 z-50 mt-1 w-64 rounded-lg border border-border bg-popover shadow-lg">
@@ -616,7 +639,7 @@ export function TaskDialog({
                           setRecordSearch(e.target.value);
                           searchRecords(e.target.value);
                         }}
-                        placeholder="Search records..."
+                        placeholder={language === "zh" ? "搜索记录..." : "Search records..."}
                         className="h-8 pl-8 text-xs"
                         autoFocus
                       />
@@ -625,12 +648,12 @@ export function TaskDialog({
                   <div className="max-h-48 overflow-auto px-1 pb-2">
                     {searchLoading && searchResults.length === 0 && (
                       <p className="px-2 py-3 text-center text-xs text-muted-foreground">
-                        Searching...
+                        {language === "zh" ? "搜索中..." : "Searching..."}
                       </p>
                     )}
                     {!searchLoading && recordSearch && searchResults.length === 0 && (
                       <p className="px-2 py-3 text-center text-xs text-muted-foreground">
-                        No results
+                        {language === "zh" ? "无结果" : "No results"}
                       </p>
                     )}
                     {searchResults
@@ -688,7 +711,7 @@ export function TaskDialog({
                   onChange={(e) => setCreateMore(e.target.checked)}
                   className="rounded border-border"
                 />
-                Create more
+                {language === "zh" ? "连续创建" : "Create more"}
               </label>
             )}
             {mode === "edit" && onDelete && (
@@ -701,7 +724,7 @@ export function TaskDialog({
                   onOpenChange(false);
                 }}
               >
-                Delete
+                {language === "zh" ? "删除" : "Delete"}
               </Button>
             )}
           </div>
@@ -711,14 +734,20 @@ export function TaskDialog({
               size="sm"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {language === "zh" ? "取消" : "Cancel"}
             </Button>
             <Button
               size="sm"
               onClick={handleSave}
               disabled={!content.trim() || saving}
             >
-              {saving ? "Saving..." : "Save"}
+              {saving
+                ? language === "zh"
+                  ? "保存中..."
+                  : "Saving..."
+                : language === "zh"
+                  ? "保存"
+                  : "Save"}
               <span className="ml-1.5 text-[10px] text-primary-foreground/60">
                 Ctrl+Enter
               </span>

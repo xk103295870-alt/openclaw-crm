@@ -4,14 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Loader2 } from "lucide-react";
-
-const TOOL_LABELS: Record<string, string> = {
-  create_record: "Create Record",
-  update_record: "Update Record",
-  delete_record: "Delete Record",
-  create_task: "Create Task",
-  create_note: "Create Note",
-};
+import { useLanguage } from "@/components/language-provider";
 
 interface ConfirmationCardProps {
   toolName: string;
@@ -30,6 +23,23 @@ export function ConfirmationCard({
   loading,
   resolved,
 }: ConfirmationCardProps) {
+  const { language } = useLanguage();
+  const TOOL_LABELS: Record<string, string> =
+    language === "zh"
+      ? {
+          create_record: "创建记录",
+          update_record: "更新记录",
+          delete_record: "删除记录",
+          create_task: "创建任务",
+          create_note: "创建笔记",
+        }
+      : {
+          create_record: "Create Record",
+          update_record: "Update Record",
+          delete_record: "Delete Record",
+          create_task: "Create Task",
+          create_note: "Create Note",
+        };
   const label = TOOL_LABELS[toolName] || toolName;
 
   return (
@@ -40,15 +50,15 @@ export function ConfirmationCard({
             {label}
           </Badge>
           {resolved === "approved" && (
-            <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-              Approved
-            </Badge>
-          )}
-          {resolved === "rejected" && (
-            <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
-              Rejected
-            </Badge>
-          )}
+              <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+              {language === "zh" ? "已批准" : "Approved"}
+              </Badge>
+            )}
+            {resolved === "rejected" && (
+              <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+              {language === "zh" ? "已拒绝" : "Rejected"}
+              </Badge>
+            )}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 pb-2">
@@ -67,9 +77,9 @@ export function ConfirmationCard({
             {loading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              <Check className="h-3 w-3" />
+            <Check className="h-3 w-3" />
             )}
-            Approve
+            {language === "zh" ? "批准" : "Approve"}
           </Button>
           <Button
             size="sm"
@@ -79,7 +89,7 @@ export function ConfirmationCard({
             className="gap-1"
           >
             <X className="h-3 w-3" />
-            Reject
+            {language === "zh" ? "拒绝" : "Reject"}
           </Button>
         </CardFooter>
       )}

@@ -16,6 +16,7 @@ import {
   Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/language-provider";
 
 interface NoteEditorPanelProps {
   open: boolean;
@@ -44,6 +45,7 @@ export function NoteEditorPanel({
   onNoteCreated,
   onNoteDeleted,
 }: NoteEditorPanelProps) {
+  const { language } = useLanguage();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState<unknown>(null);
   const [liveNoteId, setLiveNoteId] = useState<string | null>(null);
@@ -210,7 +212,7 @@ export function NoteEditorPanel({
             <Building2 className="h-2.5 w-2.5 text-white" />
           </div>
           <DialogTitle className="text-sm font-medium truncate flex-1">
-            {recordDisplayName || "Untitled"}
+            {recordDisplayName || (language === "zh" ? "未命名" : "Untitled")}
           </DialogTitle>
         </div>
 
@@ -218,7 +220,7 @@ export function NoteEditorPanel({
         <div className="flex items-center justify-end gap-2 px-4 py-1.5 border-b border-border/50">
           {saving && (
             <span className="text-[10px] text-muted-foreground">
-              Saving...
+              {language === "zh" ? "保存中..." : "Saving..."}
             </span>
           )}
           <Button
@@ -234,7 +236,7 @@ export function NoteEditorPanel({
             }}
           >
             <Copy className="h-3 w-3" />
-            Copy link
+            {language === "zh" ? "复制链接" : "Copy link"}
           </Button>
           <div className="relative" ref={menuRef}>
             <Button
@@ -255,7 +257,7 @@ export function NoteEditorPanel({
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted/50"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Delete note
+                  {language === "zh" ? "删除笔记" : "Delete note"}
                 </button>
               </div>
             )}
@@ -265,7 +267,9 @@ export function NoteEditorPanel({
         {/* Note content */}
         <div className="flex-1 overflow-auto px-12 py-6">
           {!ready ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">
+              {language === "zh" ? "加载中..." : "Loading..."}
+            </p>
           ) : (
             <>
               {/* Title */}
@@ -273,7 +277,7 @@ export function NoteEditorPanel({
                 ref={titleRef}
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Untitled note"
+                placeholder={language === "zh" ? "未命名笔记" : "Untitled note"}
                 className="w-full bg-transparent text-2xl font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none border-none mb-2"
               />
 
@@ -297,7 +301,7 @@ export function NoteEditorPanel({
               <NoteEditor
                 content={content}
                 onChange={handleContentChange}
-                placeholder="Start typing..."
+                placeholder={language === "zh" ? "开始输入..." : "Start typing..."}
                 className="border-none"
               />
             </>
