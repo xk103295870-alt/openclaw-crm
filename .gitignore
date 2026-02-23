@@ -40,7 +40,7 @@ marketing/
 .claude/agents/writer-*.md
 
 # Internal dev docs (not needed by end users)
-docs/
+/docs/
 frontend-redesign/
 ASK.md
 ATTIO_RESEARCH.md

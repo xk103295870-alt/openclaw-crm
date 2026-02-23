@@ -20,6 +20,9 @@ import {
   Zap,
 } from "lucide-react";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { LandingLanguageToggle } from "@/components/landing/landing-language-toggle";
+import { getRequestLanguage } from "@/lib/i18n-server";
+import { DocsZhContent } from "./docs-zh-content";
 
 /* ── Section groups ─────────────────────────────────────── */
 
@@ -81,7 +84,12 @@ export const metadata = {
   },
 };
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  const language = await getRequestLanguage();
+  if (language === "zh") {
+    return <DocsZhContent />;
+  }
+
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       {/* ── Nav ─────────────────────────────────────── */}
@@ -108,6 +116,7 @@ export default function DocsPage() {
             >
               <GitHubLogoIcon className="h-[18px] w-[18px]" />
             </a>
+            <LandingLanguageToggle />
             <Link
               href="/login"
               className="hidden sm:inline-flex rounded-full px-4 py-1.5 text-[13px] text-muted-foreground transition-all hover:text-foreground hover:bg-foreground/[0.04]"
