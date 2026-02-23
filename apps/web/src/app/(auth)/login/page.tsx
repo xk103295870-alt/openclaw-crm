@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/analytics";
+import { useLanguage } from "@/components/language-provider";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/home";
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -62,13 +64,13 @@ function LoginForm() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Invalid email or password");
+        setError(result.error.message || t("auth.login.invalidCredentials"));
       } else {
         trackEvent("login_completed");
         await handlePostLogin();
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.login.genericError"));
     } finally {
       setLoading(false);
     }
@@ -77,9 +79,9 @@ function LoginForm() {
   return (
     <div className="rounded-2xl border border-foreground/[0.06] dark:border-white/[0.06] bg-foreground/[0.015] dark:bg-white/[0.02] px-8 py-8">
       <div className="text-center mb-6">
-        <h1 className="text-title-4">Welcome back</h1>
+        <h1 className="text-title-4">{t("auth.login.title")}</h1>
         <p className="text-body-sm text-muted-foreground/70 mt-1.5">
-          Sign in to your account
+          {t("auth.login.subtitle")}
         </p>
       </div>
 
@@ -91,12 +93,12 @@ function LoginForm() {
         )}
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-label text-muted-foreground">
-            Email
+            {t("auth.login.email")}
           </label>
           <input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t("auth.login.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -108,12 +110,12 @@ function LoginForm() {
             htmlFor="password"
             className="text-label text-muted-foreground"
           >
-            Password
+            {t("auth.login.password")}
           </label>
           <input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t("auth.login.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -125,17 +127,17 @@ function LoginForm() {
           disabled={loading}
           className="w-full rounded-full bg-foreground py-2.5 text-[13px] font-medium text-background shadow-[0_1px_4px_rgba(0,0,0,0.1),0_0px_1px_rgba(0,0,0,0.06)] transition-all hover:opacity-80 hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
       </form>
 
       <p className="mt-6 text-center text-[13px] text-muted-foreground/60">
-        Don&apos;t have an account?{" "}
+        {t("auth.login.noAccount")}{" "}
         <Link
           href="/register"
           className="text-foreground transition-colors hover:underline"
         >
-          Sign up
+          {t("auth.login.signUp")}
         </Link>
       </p>
     </div>

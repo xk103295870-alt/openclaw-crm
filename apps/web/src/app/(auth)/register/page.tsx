@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/analytics";
+import { useLanguage } from "@/components/language-provider";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +23,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t("auth.register.passwordTooShort"));
       setLoading(false);
       return;
     }
@@ -34,7 +36,7 @@ export default function RegisterPage() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Registration failed");
+        setError(result.error.message || t("auth.register.registrationFailed"));
         return;
       }
 
@@ -56,7 +58,7 @@ export default function RegisterPage() {
       trackEvent("signup_completed");
       router.push("/home");
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.register.genericError"));
     } finally {
       setLoading(false);
     }
@@ -68,9 +70,9 @@ export default function RegisterPage() {
   return (
     <div className="rounded-2xl border border-foreground/[0.06] dark:border-white/[0.06] bg-foreground/[0.015] dark:bg-white/[0.02] px-8 py-8">
       <div className="text-center mb-6">
-        <h1 className="text-title-4">Create an account</h1>
+        <h1 className="text-title-4">{t("auth.register.title")}</h1>
         <p className="text-body-sm text-muted-foreground/70 mt-1.5">
-          Get started with your CRM
+          {t("auth.register.subtitle")}
         </p>
       </div>
 
@@ -82,12 +84,12 @@ export default function RegisterPage() {
         )}
         <div className="space-y-1.5">
           <label htmlFor="name" className="text-label text-muted-foreground">
-            Name
+            {t("auth.register.name")}
           </label>
           <input
             id="name"
             type="text"
-            placeholder="Your name"
+            placeholder={t("auth.register.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -96,12 +98,12 @@ export default function RegisterPage() {
         </div>
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-label text-muted-foreground">
-            Email
+            {t("auth.register.email")}
           </label>
           <input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t("auth.login.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -113,12 +115,12 @@ export default function RegisterPage() {
             htmlFor="password"
             className="text-label text-muted-foreground"
           >
-            Password
+            {t("auth.register.password")}
           </label>
           <input
             id="password"
             type="password"
-            placeholder="At least 8 characters"
+            placeholder={t("auth.register.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -131,34 +133,38 @@ export default function RegisterPage() {
             htmlFor="workspace-name"
             className="text-label text-muted-foreground"
           >
-            Workspace name
+            {t("auth.register.workspaceName")}
           </label>
           <input
             id="workspace-name"
             type="text"
-            placeholder={name ? `${name}'s Workspace` : "My Workspace"}
+            placeholder={
+              name
+                ? `${name}'s Workspace`
+                : t("auth.register.workspaceNamePlaceholderFallback")
+            }
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             className={inputClass}
           />
-          <p className="text-caption">Leave blank to use your name</p>
+          <p className="text-caption">{t("auth.register.workspaceNameHint")}</p>
         </div>
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-full bg-foreground py-2.5 text-[13px] font-medium text-background shadow-[0_1px_4px_rgba(0,0,0,0.1),0_0px_1px_rgba(0,0,0,0.06)] transition-all hover:opacity-80 hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Creating account..." : "Create account"}
+          {loading ? t("auth.register.submitting") : t("auth.register.submit")}
         </button>
       </form>
 
       <p className="mt-6 text-center text-[13px] text-muted-foreground/60">
-        Already have an account?{" "}
+        {t("auth.register.haveAccount")}{" "}
         <Link
           href="/login"
           className="text-foreground transition-colors hover:underline"
         >
-          Sign in
+          {t("auth.register.signIn")}
         </Link>
       </p>
     </div>

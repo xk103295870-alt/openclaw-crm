@@ -6,10 +6,12 @@ import Link from "next/link";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Search, LogOut, Bell, Menu } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
           className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/50"
         >
           <Search className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Search...</span>
+          <span className="hidden sm:inline">{t("topbar.search")}</span>
           <kbd className="ml-4 hidden text-[10px] font-medium text-muted-foreground/60 sm:inline">
             Ctrl K
           </kbd>

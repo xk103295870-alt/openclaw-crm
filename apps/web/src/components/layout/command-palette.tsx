@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import type { SearchResult } from "@/services/search";
+import { useLanguage } from "@/components/language-provider";
 
 const OBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   people: Users,
@@ -25,14 +26,14 @@ const OBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 const PAGE_ITEMS = [
-  { id: "home", label: "Home", icon: Home, url: "/home" },
-  { id: "tasks", label: "Tasks", icon: CheckSquare, url: "/tasks" },
-  { id: "notes", label: "Notes", icon: StickyNote, url: "/notes" },
-  { id: "people", label: "People", icon: Users, url: "/objects/people" },
-  { id: "companies", label: "Companies", icon: Building2, url: "/objects/companies" },
-  { id: "deals", label: "Deals", icon: Handshake, url: "/objects/deals" },
-  { id: "settings", label: "Settings", icon: Settings, url: "/settings" },
-];
+  { id: "home", labelKey: "nav.home", icon: Home, url: "/home" },
+  { id: "tasks", labelKey: "nav.tasks", icon: CheckSquare, url: "/tasks" },
+  { id: "notes", labelKey: "nav.notes", icon: StickyNote, url: "/notes" },
+  { id: "people", labelKey: "nav.people", icon: Users, url: "/objects/people" },
+  { id: "companies", labelKey: "nav.companies", icon: Building2, url: "/objects/companies" },
+  { id: "deals", labelKey: "nav.deals", icon: Handshake, url: "/objects/deals" },
+  { id: "settings", labelKey: "nav.settings", icon: Settings, url: "/settings" },
+] as const;
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -40,6 +41,7 @@ export function CommandPalette() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Toggle with Ctrl+K / Cmd+K
@@ -115,7 +117,7 @@ export function CommandPalette() {
     <Command.Dialog
       open={open}
       onOpenChange={handleOpenChange}
-      label="Command palette"
+      label={t("commandPalette.label")}
       className="fixed inset-0 z-50"
     >
       {/* Backdrop */}
@@ -132,7 +134,7 @@ export function CommandPalette() {
           <Command.Input
             value={query}
             onValueChange={setQuery}
-            placeholder="Search records, lists, or navigate..."
+            placeholder={t("commandPalette.placeholder")}
             className="flex h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {loading && (
@@ -145,14 +147,14 @@ export function CommandPalette() {
           <Command.Empty className="px-4 py-8 text-center text-sm text-muted-foreground">
             {query.trim()
               ? loading
-                ? "Searching..."
-                : "No results found."
-              : "Type to search or select a page below."}
+                ? t("commandPalette.searching")
+                : t("commandPalette.noResults")
+              : t("commandPalette.empty")}
           </Command.Empty>
 
           {/* Search results */}
           {results.length > 0 && (
-            <Command.Group heading="Search Results" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+            <Command.Group heading={t("commandPalette.group.searchResults")} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
               {results.map((result) => {
                 const Icon = getResultIcon(result);
                 return (
@@ -177,16 +179,16 @@ export function CommandPalette() {
           )}
 
           {/* Quick navigation pages */}
-          <Command.Group heading="Pages" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+          <Command.Group heading={t("commandPalette.group.pages")} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
             {PAGE_ITEMS.map((item) => (
               <Command.Item
                 key={item.id}
-                value={item.label}
+                value={t(item.labelKey)}
                 onSelect={() => navigate(item.url)}
                 className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm aria-selected:bg-accent"
               >
                 <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </Command.Item>
             ))}
           </Command.Group>
@@ -201,7 +203,7 @@ export function CommandPalette() {
               >
                 <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <span>
-                  View all results for &ldquo;{query}&rdquo;
+                  {t("commandPalette.viewAll")} &ldquo;{query}&rdquo;
                 </span>
               </Command.Item>
             </Command.Group>

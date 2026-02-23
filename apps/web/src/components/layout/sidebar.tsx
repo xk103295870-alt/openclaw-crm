@@ -31,25 +31,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/components/language-provider";
 
 const mainNav = [
-  { href: "/home", label: "Home", icon: Home },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/tasks", label: "Tasks", icon: CheckSquare },
-  { href: "/notes", label: "Notes", icon: StickyNote },
-  { href: "/notifications", label: "Notifications", icon: Bell },
-];
+  { href: "/home", labelKey: "nav.home", icon: Home },
+  { href: "/chat", labelKey: "nav.chat", icon: MessageSquare },
+  { href: "/tasks", labelKey: "nav.tasks", icon: CheckSquare },
+  { href: "/notes", labelKey: "nav.notes", icon: StickyNote },
+  { href: "/notifications", labelKey: "nav.notifications", icon: Bell },
+] as const;
 
 const objectNav = [
-  { href: "/objects/people", label: "People", icon: Users },
-  { href: "/objects/companies", label: "Companies", icon: Building2 },
-  { href: "/objects/deals", label: "Deals", icon: Handshake },
-];
+  { href: "/objects/people", labelKey: "nav.people", icon: Users },
+  { href: "/objects/companies", labelKey: "nav.companies", icon: Building2 },
+  { href: "/objects/deals", labelKey: "nav.deals", icon: Handshake },
+] as const;
 
 const bottomNav = [
-  { href: "/docs", label: "Docs", icon: BookOpen },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+  { href: "/docs", labelKey: "nav.docs", icon: BookOpen },
+  { href: "/settings", labelKey: "nav.settings", icon: Settings },
+] as const;
 
 interface ListItem {
   id: string;
@@ -67,12 +68,13 @@ interface Workspace {
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [lists, setLists] = useState<ListItem[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     fetch("/api/v1/lists")
@@ -175,7 +177,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <DropdownMenuItem asChild>
               <Link href="/select-workspace?create=true" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                <span>Create workspace</span>
+                <span>{t("sidebar.createWorkspace")}</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -187,7 +189,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {mainNav.map((item) => (
           <NavItem
             key={item.href}
-            {...item}
+            href={item.href}
+            label={t(item.labelKey)}
+            icon={item.icon}
             active={pathname === item.href}
             expanded={expanded}
             onClick={onNavigate}
@@ -199,7 +203,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {objectNav.map((item) => (
           <NavItem
             key={item.href}
-            {...item}
+            href={item.href}
+            label={t(item.labelKey)}
+            icon={item.icon}
             active={pathname.startsWith(item.href)}
             expanded={expanded}
             onClick={onNavigate}
@@ -239,7 +245,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
           >
             <Plus className="h-4 w-4 shrink-0" />
-            <span>New list</span>
+            <span>{t("sidebar.newList")}</span>
           </button>
         )}
       </nav>
@@ -249,12 +255,32 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {bottomNav.map((item) => (
           <NavItem
             key={item.href}
-            {...item}
+            href={item.href}
+            label={t(item.labelKey)}
+            icon={item.icon}
             active={pathname.startsWith(item.href)}
             expanded={expanded}
             onClick={onNavigate}
           />
         ))}
+
+        {/* Language toggle */}
+        <button
+          onClick={() => setLanguage(language === "zh" ? "en" : "zh")}
+          className={cn(
+            "flex w-full items-center rounded-lg py-1.5 text-sm transition-colors text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            expanded ? "gap-2.5 px-2.5" : "justify-center px-0"
+          )}
+        >
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-sidebar-border text-[11px]">
+            {language === "zh" ? t("language.short.zh") : t("language.short.en")}
+          </span>
+          {expanded && (
+            <span className="ml-2">
+              {language === "zh" ? t("language.toggleToEn") : t("language.toggleToZh")}
+            </span>
+          )}
+        </button>
 
         {/* Theme toggle */}
         <button
@@ -269,7 +295,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           ) : (
             <Moon className="h-4 w-4 shrink-0" />
           )}
-          {expanded && <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>}
+          {expanded && (
+            <span>{theme === "dark" ? t("theme.light") : t("theme.dark")}</span>
+          )}
         </button>
       </div>
 

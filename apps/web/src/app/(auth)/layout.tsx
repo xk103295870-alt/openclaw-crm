@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { tServer } from "@/lib/i18n-server";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = tServer;
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background">
       {/* Landing-tint gradient for visual continuity */}
@@ -34,7 +36,7 @@ export default function AuthLayout({
             className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground/60 transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-3 w-3" />
-            Back to home
+            {t("auth.backToHome")}
           </Link>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, Plus, Building2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface Workspace {
   id: string;
@@ -25,6 +26,7 @@ function SelectWorkspaceForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const wantCreate = searchParams.get("create") === "true";
+  const { t } = useLanguage();
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,16 +104,16 @@ function SelectWorkspaceForm() {
   }
 
   const title = showCreate
-    ? "Create a new workspace"
+    ? t("workspace.select.title.createNew")
     : workspaces.length === 0
-      ? "Create your workspace"
-      : "Select a workspace";
+      ? t("workspace.select.title.createFirst")
+      : t("workspace.select.title.select");
 
   const description = showCreate
-    ? "Each workspace has its own data, members, and settings"
+    ? t("workspace.select.desc.createNew")
     : workspaces.length === 0
-      ? "Get started by creating your first workspace"
-      : "Choose a workspace to continue";
+      ? t("workspace.select.desc.createFirst")
+      : t("workspace.select.desc.select");
 
   return (
     <Card>
@@ -134,7 +136,13 @@ function SelectWorkspaceForm() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{ws.name}</p>
-                  <p className="text-xs text-muted-foreground">{ws.role}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {ws.role === "admin"
+                      ? t("workspace.role.admin")
+                      : ws.role === "member"
+                        ? t("workspace.role.member")
+                        : ws.role}
+                  </p>
                 </div>
               </button>
             ))}
@@ -145,7 +153,7 @@ function SelectWorkspaceForm() {
               onClick={() => setShowCreate(true)}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Create new workspace
+              {t("workspace.select.createNewButton")}
             </Button>
           </div>
         )}
@@ -159,11 +167,13 @@ function SelectWorkspaceForm() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="workspace-name">Workspace name</Label>
+              <Label htmlFor="workspace-name">
+                {t("workspace.select.form.nameLabel")}
+              </Label>
               <Input
                 id="workspace-name"
                 type="text"
-                placeholder="My Workspace"
+                placeholder={t("workspace.select.form.namePlaceholder")}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 required
@@ -178,7 +188,7 @@ function SelectWorkspaceForm() {
                   className="flex-1"
                   onClick={() => setShowCreate(false)}
                 >
-                  Back
+                  {t("workspace.select.form.back")}
                 </Button>
               )}
               <Button
@@ -189,10 +199,10 @@ function SelectWorkspaceForm() {
                 {creating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    {t("workspace.select.form.creating")}
                   </>
                 ) : (
-                  "Create workspace"
+                  t("workspace.select.form.create")
                 )}
               </Button>
             </div>

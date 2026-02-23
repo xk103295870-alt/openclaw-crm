@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/components/language-provider";
 import { PlausibleScript } from "@/components/analytics/plausible-script";
 import { GA4Script } from "@/components/analytics/ga4-script";
 import { CookieConsent } from "@/components/analytics/cookie-consent";
 import "./globals.css";
+import { getRequestLanguage } from "@/lib/i18n-server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,12 +44,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const language = getRequestLanguage();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={language === "zh" ? "zh-CN" : "en"} suppressHydrationWarning>
       <body className={inter.className}>
         <PlausibleScript />
         <GA4Script />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ThemeProvider>
         <CookieConsent />
       </body>
     </html>
