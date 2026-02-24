@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useObjectRecords } from "@/hooks/use-object-records";
 import { RecordTable } from "@/components/records/record-table";
@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { CSVImportModal } from "@/components/records/csv-import-modal";
 import { generateCSV, downloadCSV } from "@/lib/csv-utils";
 import { useLanguage } from "@/components/language-provider";
+import {
+  localizeAttributes,
+  localizeObjectName,
+} from "@/lib/object-i18n";
 import {
   Plus,
   RefreshCw,
@@ -58,8 +62,32 @@ export default function ObjectPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
+  const localizedAttributes = useMemo(
+    () =>
+      object
+        ? localizeAttributes(object.slug, object.attributes as any[], language)
+        : [],
+    [object, language]
+  );
+
+  const localizedSingularName = useMemo(
+    () =>
+      object
+        ? localizeObjectName(object.slug, object.singularName, language, "singular")
+        : "",
+    [object, language]
+  );
+
+  const localizedPluralName = useMemo(
+    () =>
+      object
+        ? localizeObjectName(object.slug, object.pluralName, language, "plural")
+        : "",
+    [object, language]
+  );
+
   // Auto-detect if board view is available (has a status attribute)
-  const statusAttr = object?.attributes.find((a) => a.type === "status");
+  const statusAttr = localizedAttributes.find((a) => a.type === "status");
   const hasBoardView = !!statusAttr;
 
   if (loading && !object) {
@@ -83,7 +111,7 @@ export default function ObjectPage() {
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold">{object.pluralName}</h1>
+          <h1 className="text-lg font-semibold">{localizedPluralName}</h1>
           <span className="text-sm text-muted-foreground">
             {total}{" "}
             {language === "zh" ? "条记录" : total === 1 ? "record" : "records"}
@@ -115,7 +143,7 @@ export default function ObjectPage() {
             }
           >
             <FilterBuilder
-              attributes={object.attributes as any}
+              attributes={localizedAttributes as any}
               filter={filter}
               onChange={setFilter}
               onClose={() => setFilterOpen(false)}
@@ -147,7 +175,7 @@ export default function ObjectPage() {
             }
           >
             <SortBuilder
-              attributes={object.attributes as any}
+              attributes={localizedAttributes as any}
               sorts={sorts}
               onChange={setSorts}
               onClose={() => setSortOpen(false)}
@@ -190,8 +218,8 @@ export default function ObjectPage() {
             size="sm"
             className="text-xs gap-1"
             onClick={() => {
-              const csv = generateCSV(records, object.attributes as any);
-              downloadCSV(csv, `${object.pluralName.toLowerCase()}.csv`);
+              const csv = generateCSV(records, localizedAttributes as any);
+              downloadCSV(csv, `${localizedPluralName.toLowerCase()}.csv`);
             }}
           >
             <Download className="h-3.5 w-3.5" />
@@ -212,7 +240,9 @@ export default function ObjectPage() {
           </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
-            {language === "zh" ? `新建${object.singularName}` : `New ${object.singularName}`}
+            {language === "zh"
+              ? `新建${localizedSingularName}`
+              : `New ${localizedSingularName}`}
           </Button>
         </div>
       </div>
@@ -222,7 +252,7 @@ export default function ObjectPage() {
         <div className="border-b border-border/50 px-4 py-1.5">
           <FilterBar
             filter={filter}
-            attributes={object.attributes as any}
+            attributes={localizedAttributes as any}
             onRemoveCondition={removeFilterCondition}
             onClearAll={clearFilters}
           />
@@ -236,7 +266,7 @@ export default function ObjectPage() {
             {language === "zh" ? "排序依据：" : "Sorted by:"}
           </span>
           {sorts.map((sort, i) => {
-            const attr = object.attributes.find((a) => a.slug === sort.attribute);
+            const attr = localizedAttributes.find((a) => a.slug === sort.attribute);
             return (
               <span key={i} className="text-xs">
                 {i > 0 && <span className="text-muted-foreground mr-1">,</span>}
@@ -260,7 +290,7 @@ export default function ObjectPage() {
       <div className="flex-1 overflow-hidden">
         {view === "table" ? (
           <RecordTable
-            attributes={object.attributes as any}
+            attributes={localizedAttributes as any}
             records={records}
             onUpdateRecord={updateRecord}
             onCreateRecord={() => setCreateOpen(true)}
@@ -268,7 +298,7 @@ export default function ObjectPage() {
           />
         ) : (
           <RecordKanban
-            attributes={object.attributes as any}
+            attributes={localizedAttributes as any}
             records={records}
             statusAttributeSlug={statusAttr!.slug}
             onMoveRecord={(recordId, newStatusId) =>
@@ -306,8 +336,8 @@ export default function ObjectPage() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onSubmit={createRecord}
-        attributes={object.attributes as any}
-        objectName={object.singularName}
+        attributes={localizedAttributes as any}
+        objectName={localizedSingularName}
       />
 
       {/* Import modal */}
@@ -315,7 +345,7 @@ export default function ObjectPage() {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         objectSlug={slug}
-        objectName={object.singularName}
+        objectName={localizedSingularName}
         attributes={object.attributes as any}
         onImportComplete={fetchData}
       />

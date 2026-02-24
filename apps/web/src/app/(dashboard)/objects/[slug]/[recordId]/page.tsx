@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { RecordDetail } from "@/components/records/record-detail";
@@ -20,6 +20,10 @@ import {
 } from "lucide-react";
 import { extractPersonalName } from "@/lib/display-name";
 import { useLanguage } from "@/components/language-provider";
+import {
+  localizeAttributes,
+  localizeObjectName,
+} from "@/lib/object-i18n";
 
 interface ObjectData {
   id: string;
@@ -126,6 +130,22 @@ export default function RecordDetailPage() {
     }
   }, [language, slug, recordId, router]);
 
+  const localizedAttributes = useMemo(
+    () =>
+      object
+        ? localizeAttributes(object.slug, object.attributes as any[], language)
+        : [],
+    [object, language]
+  );
+  const localizedPluralName =
+    object
+      ? localizeObjectName(object.slug, object.pluralName, language, "plural")
+      : "";
+  const localizedSingularName =
+    object
+      ? localizeObjectName(object.slug, object.singularName, language, "singular")
+      : "";
+
   if (loading && !record) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -142,7 +162,7 @@ export default function RecordDetailPage() {
     );
   }
 
-  const nameAttr = object.attributes.find((a: any) => a.slug === "name");
+  const nameAttr = localizedAttributes.find((a: any) => a.slug === "name");
   let displayName = language === "zh" ? "未命名" : "Unnamed";
   if (nameAttr) {
     const val = record.values.name;
@@ -170,7 +190,7 @@ export default function RecordDetailPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ObjIcon className="h-4 w-4" />
               <Link href={`/objects/${slug}`} className="hover:text-foreground">
-                {object.pluralName}
+                {localizedPluralName}
               </Link>
               <span>/</span>
             </div>
@@ -225,7 +245,7 @@ export default function RecordDetailPage() {
 
             <TabsContent value="attributes">
               <RecordDetail
-                attributes={object.attributes}
+                attributes={localizedAttributes}
                 values={record.values}
                 onUpdate={handleUpdate}
               />
@@ -264,7 +284,10 @@ export default function RecordDetailPage() {
               label={language === "zh" ? "记录 ID" : "Record ID"}
               value={record.id.slice(0, 8) + "..."}
             />
-            <MetaItem label={language === "zh" ? "对象" : "Object"} value={object.singularName} />
+            <MetaItem
+              label={language === "zh" ? "对象" : "Object"}
+              value={localizedSingularName}
+            />
             <MetaItem
               label={language === "zh" ? "创建时间" : "Created"}
               value={new Date(record.createdAt).toLocaleDateString(

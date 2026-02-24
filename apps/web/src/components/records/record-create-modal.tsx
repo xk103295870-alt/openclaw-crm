@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Star, X, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/language-provider";
+import { localizeObjectName } from "@/lib/object-i18n";
 
 interface AttributeDef {
   id: string;
@@ -420,7 +421,14 @@ function RecordReferencePicker({
                 <Building2 className="h-2.5 w-2.5 text-white" />
               </div>
               <span className="truncate flex-1 text-left">{rec.displayName}</span>
-              <span className="text-[10px] text-muted-foreground">{rec.objectName}</span>
+              <span className="text-[10px] text-muted-foreground">
+                {localizeObjectName(
+                  rec.objectSlug,
+                  rec.objectName,
+                  language,
+                  "plural"
+                )}
+              </span>
             </button>
           ))}
         </div>
